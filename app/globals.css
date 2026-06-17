@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* shadcn/ui tokens — warm "paper" light theme tuned to the brand palette */
+    --background: 18 33% 97%; /* paper #FAF6F3 */
+    --foreground: 330 14% 9%; /* ink #1B1418 */
+
+    --card: 0 0% 100%;
+    --card-foreground: 330 14% 9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 330 14% 9%;
+
+    --primary: 351 73% 27%; /* crimson #7A1322 */
+    --primary-foreground: 18 33% 97%;
+
+    --secondary: 14 47% 92%; /* blush #F4E3DE */
+    --secondary-foreground: 351 73% 27%;
+
+    --muted: 14 47% 92%;
+    --muted-foreground: 10 9% 39%; /* stone #6B5D5A */
+
+    --accent: 4 60% 47%; /* signal #C8362C */
+    --accent-foreground: 18 33% 97%;
+
+    --destructive: 4 87% 56%; /* glow #F0402F */
+    --destructive-foreground: 18 33% 97%;
+
+    --border: 9 38% 87%; /* line #E7D7D2 */
+    --input: 9 38% 87%;
+    --ring: 351 73% 27%;
+
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}

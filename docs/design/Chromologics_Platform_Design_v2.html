@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chromologics — Sales Intelligence Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Raleway:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1B1418; --crimson:#7A1322; --signal:#C8362C; --glow:#F0402F;
+  --paper:#FAF6F3; --blush:#F4E3DE; --stone:#6B5D5A; --line:#E7D7D2;
+  --night:#140E10; --night2:#241115; --night3:#34151b;
+  --hi:#D33A3A; --med:#C9882F; --tail:#3E8E5E; --head:#C0392B; --neutral:#9a9591;
+  --disp:"Space Grotesk",system-ui,sans-serif;
+  --body:"Inter",system-ui,-apple-system,sans-serif;
+  --mark:"Raleway",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--body);color:var(--ink);background:var(--paper);-webkit-font-smoothing:antialiased;line-height:1.55;}
+a{color:inherit;text-decoration:none;}
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px;}
+
+/* ============ NAV ============ */
+.nav{position:sticky;top:0;z-index:50;background:rgba(20,14,16,.9);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.08);}
+.nav .wrap{display:flex;align-items:center;gap:22px;height:62px;}
+.brand{display:flex;align-items:center;gap:10px;cursor:pointer;}
+.brand .mk{width:25px;height:25px;flex:none;}
+.brand .wm{font-family:var(--mark);font-weight:800;letter-spacing:.12em;font-size:14.5px;color:#fff;}
+.brand .wm b{color:var(--glow);font-weight:800;}
+.tabs{display:flex;gap:2px;margin-left:6px;}
+.tabs button{font-family:var(--body);font-size:13px;font-weight:600;color:rgba(255,255,255,.6);background:transparent;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;transition:.15s;white-space:nowrap;}
+.tabs button:hover{color:#fff;}
+.tabs button.on{color:#fff;background:rgba(255,255,255,.11);}
+.nav .cta{margin-left:auto;display:flex;align-items:center;gap:12px;}
+.nav .live{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.5);display:flex;align-items:center;gap:7px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--glow);animation:pulse 1.8s infinite;}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(240,64,47,.55)}70%{box-shadow:0 0 0 8px rgba(240,64,47,0)}100%{box-shadow:0 0 0 0 rgba(240,64,47,0)}}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--signal);color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;}
+.btn{font-family:var(--body);font-weight:600;font-size:13px;border:none;border-radius:9px;padding:9px 16px;cursor:pointer;transition:.18s;}
+.btn-red{background:var(--signal);color:#fff;}
+.btn-red:hover{background:var(--glow);transform:translateY(-1px);}
+.btn-ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.22);}
+.btn-ghost:hover{border-color:#fff;}
+.btn-dark{background:var(--ink);color:#fff;}
+.btn-dark:hover{background:#000;}
+.btn-line{background:#fff;color:var(--ink);border:1px solid var(--line);}
+.btn-line:hover{border-color:var(--signal);color:var(--signal);}
+
+/* view switch */
+.view{display:none;animation:fade .4s ease;}
+.view.on{display:block;}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* app shell */
+.app{min-height:80vh;padding:34px 0 90px;}
+.appbar{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:24px;}
+.appbar .t{font-family:var(--disp);font-weight:600;font-size:27px;letter-spacing:-.01em;}
+.appbar .crumb{font-size:11.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--signal);}
+.appbar .sub2{font-size:13.5px;color:var(--stone);margin-top:3px;}
+.appbar .right{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.select{font-family:var(--body);font-size:13px;padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font-weight:500;}
+.eyebrow{font-size:11.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--signal);}
+.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;}
+.panel .ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.panel h3{font-family:var(--disp);font-size:16px;font-weight:600;}
+.panel .meta{font-size:11.5px;color:var(--stone);}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;}
+.c-head{background:#fbe6e3;color:var(--head);}.c-tail{background:#e4f0e8;color:var(--tail);}
+.c-neu{background:#eee9e7;color:var(--stone);}.c-hi{background:var(--hi);color:#fff;}
+.c-med{background:#f6ead4;color:#8a5a14;}.c-blue{background:#e6edf5;color:#3a5b86;}
+
+/* ============ OVERVIEW / DASHBOARD ============ */
+.hello{background:radial-gradient(120% 140% at 88% 0%,var(--night3),var(--night2) 45%,var(--night) 85%);color:#fff;border-radius:20px;padding:30px 32px;position:relative;overflow:hidden;margin-bottom:22px;}
+.hello::after{content:"";position:absolute;right:-30px;top:-30px;width:260px;height:260px;background:radial-gradient(circle,rgba(240,64,47,.5),transparent 62%);filter:blur(8px);}
+.hello .day{font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.55);font-weight:600;}
+.hello h2{font-family:var(--disp);font-weight:600;font-size:30px;letter-spacing:-.01em;margin:6px 0 10px;}
+.hello p{font-size:15px;color:rgba(255,255,255,.78);max-width:560px;position:relative;}
+.hello p b{color:#fff;}
+.hello .quick{display:flex;gap:30px;margin-top:22px;flex-wrap:wrap;position:relative;}
+.hello .q .n{font-family:var(--disp);font-size:27px;font-weight:600;}
+.hello .q .n b{color:var(--glow);}
+.hello .q .l{font-size:12px;color:rgba(255,255,255,.6);}
+
+.dashgrid{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:18px;}
+.dashgrid .col{display:flex;flex-direction:column;gap:18px;}
+
+/* schedule timeline */
+.tl{display:flex;flex-direction:column;}
+.ev{display:flex;gap:13px;padding:11px 0;border-top:1px solid #f1e7e3;}
+.ev:first-child{border-top:none;}
+.ev .time{font-family:var(--disp);font-size:12.5px;font-weight:600;color:var(--crimson);width:46px;flex:none;padding-top:1px;}
+.ev .body{flex:1;}
+.ev .ttl{font-size:14px;font-weight:600;}
+.ev .dsc{font-size:12.5px;color:var(--stone);margin-top:2px;}
+.ev.now{background:#fdf2f0;border-radius:10px;padding:11px;margin:2px 0;border-top:none;}
+.ev .badge2{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--signal);}
+
+/* tasks */
+.task{display:flex;gap:11px;align-items:flex-start;padding:10px 0;border-top:1px solid #f1e7e3;font-size:13.5px;}
+.task:first-child{border-top:none;}
+.ck{width:18px;height:18px;border-radius:6px;border:1.6px solid var(--line);flex:none;margin-top:1px;cursor:pointer;transition:.15s;}
+.ck.done{background:var(--tail);border-color:var(--tail);}
+.task .pri{font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:1px 6px;border-radius:5px;margin-left:auto;flex:none;}
+.pri-h{background:#fbe6e3;color:var(--head);}.pri-m{background:#f6ead4;color:#8a5a14;}.pri-l{background:#eee9e7;color:var(--stone);}
+.task.done span{color:var(--neutral);text-decoration:line-through;}
+
+/* lead-to-contact mini */
+.lc{display:flex;gap:11px;padding:11px 0;border-top:1px solid #f1e7e3;}
+.lc:first-child{border-top:none;}
+.lc .lg{width:34px;height:34px;border-radius:9px;background:var(--blush);color:var(--crimson);display:grid;place-items:center;font-weight:700;font-size:13px;flex:none;font-family:var(--disp);}
+.lc .nm{font-size:13.5px;font-weight:600;}
+.lc .rsn{font-size:12px;color:var(--stone);margin-top:1px;}
+.lc .go{margin-left:auto;align-self:center;font-size:12px;font-weight:600;color:var(--signal);white-space:nowrap;}
+
+/* heads-up signal */
+.sig{display:flex;gap:11px;padding:12px;border-radius:11px;margin-bottom:10px;font-size:13px;border:1px solid var(--line);}
+.sig:last-child{margin-bottom:0;}
+.sig .ic{width:30px;height:30px;border-radius:8px;flex:none;display:grid;place-items:center;}
+.sig.red .ic{background:#fbe6e3;color:var(--head);} .sig.green .ic{background:#e4f0e8;color:var(--tail);} .sig.blue .ic{background:#e6edf5;color:#3a5b86;}
+.sig .ic svg{width:16px;height:16px;}
+.sig b{font-weight:600;}
+.sig .sx{font-size:11.5px;color:var(--stone);margin-top:2px;}
+
+/* ============ KPI / METRIC TILES (shared) ============ */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:15px;padding:17px;position:relative;overflow:hidden;}
+.kpi .k{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--stone);}
+.kpi .v{font-family:var(--disp);font-weight:600;font-size:28px;letter-spacing:-.02em;margin-top:7px;}
+.kpi .d{font-size:12px;margin-top:4px;font-weight:600;}
+.kpi .strip{position:absolute;left:0;top:0;bottom:0;width:4px;}
+.up{color:var(--head);}.down{color:var(--tail);}.flat{color:var(--neutral);}
+.grid2{display:grid;grid-template-columns:1.35fr 1fr;gap:20px;}
+
+/* alert / table / dossier (monthly) */
+.alert{border:1px solid #f2cccc;background:linear-gradient(0deg,#fdf1f1,#fdf6f4);border-radius:13px;padding:16px 18px;margin-bottom:18px;}
+.alert .lbl{display:flex;align-items:center;gap:8px;color:var(--hi);font-weight:700;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;}
+.alert ul{list-style:none;display:flex;flex-direction:column;gap:9px;}
+.alert li{font-size:13.5px;display:flex;gap:10px;}
+.alert li b{color:var(--ink);}
+.alert .pill{flex:none;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;height:fit-content;background:var(--hi);color:#fff;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--stone);padding:8px;border-bottom:1.5px solid var(--line);}
+tbody td{padding:11px 8px;border-bottom:1px solid #f1e7e3;vertical-align:top;}
+tbody tr:hover{background:#fcf6f4;}
+.tg{font-size:13px;}
+.dossier{display:flex;flex-direction:column;gap:12px;}
+.doss{border:1px solid var(--line);border-radius:13px;padding:14px 15px;position:relative;overflow:hidden;background:#fff;}
+.doss::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--hi);}
+.doss.t-med::before{background:var(--med);}
+.doss .top{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;}
+.doss .co{font-family:var(--disp);font-weight:600;font-size:15.5px;}
+.doss .co small{font-weight:400;font-size:11.5px;color:var(--stone);margin-left:3px;}
+.doss .bd{margin-left:auto;}
+.doss p{font-size:12.5px;color:var(--stone);margin-top:6px;}
+
+/* ============ LEADS RADAR ============ */
+.radarbar{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:20px;align-items:center;}
+.fchip{font-size:12.5px;font-weight:600;padding:7px 13px;border-radius:20px;border:1px solid var(--line);background:#fff;color:var(--stone);cursor:pointer;}
+.fchip.on{background:var(--ink);color:#fff;border-color:var(--ink);}
+.leadgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.lead{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;position:relative;transition:.2s;}
+.lead:hover{box-shadow:0 14px 36px rgba(122,19,34,.1);transform:translateY(-3px);}
+.lead .lh{display:flex;align-items:flex-start;gap:13px;}
+.lead .mono{width:46px;height:46px;border-radius:12px;background:var(--ink);color:#fff;display:grid;place-items:center;font-family:var(--disp);font-weight:600;font-size:17px;flex:none;}
+.lead .co{font-family:var(--disp);font-size:18px;font-weight:600;}
+.lead .sub{font-size:12px;color:var(--stone);margin-top:2px;}
+.lead .fit{margin-left:auto;text-align:center;flex:none;}
+.lead .fit .ring{font-family:var(--disp);font-weight:700;font-size:18px;color:var(--tail);}
+.lead .fit .fl{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--stone);font-weight:700;}
+.lead .new{position:absolute;top:16px;right:16px;font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--glow);color:#fff;padding:2px 8px;border-radius:20px;}
+.lead .prof{font-size:13px;color:var(--ink);margin:14px 0;line-height:1.55;}
+.lead .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:12.5px;margin-bottom:13px;}
+.lead .kv .k{color:var(--stone);font-weight:600;}
+.lead .why{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:12px 13px;margin-bottom:13px;}
+.lead .why .wt{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--signal);margin-bottom:5px;}
+.lead .why p{font-size:12.5px;line-height:1.5;}
+.lead .why .pitch{display:inline-block;margin-top:7px;font-size:11.5px;font-weight:600;color:var(--crimson);background:var(--blush);padding:3px 9px;border-radius:6px;}
+.lead .tagrow{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.lead .src{font-size:11.5px;color:var(--stone);display:flex;align-items:center;gap:6px;margin-bottom:13px;}
+.lead .src svg{width:13px;height:13px;color:var(--signal);}
+.lead .acts{display:flex;gap:9px;}
+.lead .acts .btn{flex:1;text-align:center;}
+
+/* ============ SALES COACH ============ */
+.scorehead{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center;background:var(--ink);color:#fff;border-radius:18px;padding:24px 28px;margin-bottom:22px;}
+.bigscore{text-align:center;}
+.bigscore .ns{font-family:var(--disp);font-size:56px;font-weight:700;line-height:1;}
+.bigscore .ns small{font-size:20px;color:rgba(255,255,255,.45);}
+.bigscore .lb{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:4px;}
+.bigscore .delta{font-size:12.5px;color:#7fd3a0;font-weight:600;margin-top:6px;}
+.scorehead .msg{font-size:14.5px;color:rgba(255,255,255,.82);line-height:1.6;}
+.scorehead .msg b{color:#fff;}
+
+.metricgrid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.mrow{padding:13px 0;border-top:1px solid #f1e7e3;}
+.mrow:first-child{border-top:none;}
+.mrow .mt{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:7px;}
+.mrow .mt b{font-weight:600;}
+.mrow .mt .val{font-family:var(--disp);font-weight:600;}
+.bar{height:8px;border-radius:6px;background:#eee5e1;overflow:hidden;position:relative;}
+.bar i{display:block;height:100%;border-radius:6px;}
+.bar .target{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.55;}
+.mhint{font-size:11.5px;color:var(--stone);margin-top:5px;}
+
+/* trend chart */
+.trend{display:flex;align-items:flex-end;gap:10px;height:150px;padding-top:10px;}
+.tcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;justify-content:flex-end;height:100%;}
+.tcol .bars{display:flex;align-items:flex-end;gap:3px;height:100%;width:100%;justify-content:center;}
+.tcol .bars i{width:11px;border-radius:4px 4px 0 0;}
+.tcol .lbl{font-size:10.5px;color:var(--stone);}
+.legend{display:flex;gap:16px;font-size:11.5px;color:var(--stone);margin-top:12px;}
+.legend span{display:flex;align-items:center;gap:6px;}
+.legend i{width:10px;height:10px;border-radius:3px;}
+
+.patterns{display:flex;flex-direction:column;gap:10px;}
+.pat{display:flex;gap:11px;font-size:13px;padding:11px 13px;border-radius:11px;border:1px solid var(--line);}
+.pat.win{background:#f1f8f3;border-color:#cfe6d6;}
+.pat.grow{background:#fdf4ec;border-color:#f0dcc4;}
+.pat .pi{font-weight:700;flex:none;}
+.pat.win .pi{color:var(--tail);} .pat.grow .pi{color:var(--med);}
+.pat b{font-weight:600;}
+.coachtip{background:var(--blush);border-radius:12px;padding:14px 16px;font-size:13px;margin-top:14px;}
+.coachtip .ct{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--crimson);margin-bottom:6px;display:flex;align-items:center;gap:7px;}
+.coachtip b{color:var(--crimson);}
+
+/* recent calls */
+.callrow{display:flex;align-items:center;gap:13px;padding:12px 0;border-top:1px solid #f1e7e3;font-size:13.5px;}
+.callrow:first-child{border-top:none;}
+.callrow .sc{font-family:var(--disp);font-weight:700;font-size:16px;width:42px;text-align:center;flex:none;}
+.callrow .ci{flex:1;}
+.callrow .ci .cs{font-size:11.5px;color:var(--stone);}
+
+/* agent (carried over) */
+.callbar{display:flex;align-items:center;gap:14px;background:var(--ink);color:#fff;border-radius:15px;padding:14px 20px;margin-bottom:20px;}
+.callbar .rec{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;}
+.callbar .who{font-size:13px;color:rgba(255,255,255,.7);}
+.callbar .who b{color:#fff;font-weight:600;}
+.callbar .timer{margin-left:auto;font-family:var(--disp);font-size:15px;color:rgba(255,255,255,.85);}
+.eq{display:flex;align-items:flex-end;gap:2px;height:18px;}
+.eq i{width:3px;background:var(--glow);border-radius:2px;animation:eq 1s infinite ease-in-out;}
+.eq i:nth-child(1){animation-delay:0s}.eq i:nth-child(2){animation-delay:.15s}.eq i:nth-child(3){animation-delay:.3s}.eq i:nth-child(4){animation-delay:.45s}.eq i:nth-child(5){animation-delay:.2s}
+@keyframes eq{0%,100%{height:4px}50%{height:18px}}
+.agentgrid{display:grid;grid-template-columns:1fr 1.25fr;gap:20px;}
+.transcript{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;}
+.tline{display:flex;gap:11px;margin-bottom:16px;}
+.tline .av{width:30px;height:30px;border-radius:9px;flex:none;display:grid;place-items:center;font-size:11px;font-weight:700;}
+.av.cust{background:var(--blush);color:var(--crimson);}.av.rep{background:var(--ink);color:#fff;}
+.tline .tx{font-size:13.5px;}
+.tline .nm{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--stone);margin-bottom:3px;}
+.tline.flag .tx{background:#fdf1f1;border-left:3px solid var(--signal);padding:8px 11px;border-radius:0 8px 8px 0;}
+.seg{display:inline-flex;background:#fff;border:1px solid var(--line);border-radius:11px;padding:4px;gap:3px;margin-bottom:16px;}
+.seg button{border:none;background:transparent;font-family:var(--body);font-size:12.5px;font-weight:600;color:var(--stone);padding:7px 14px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:7px;}
+.seg button.on.tech{background:var(--ink);color:#fff;}
+.seg button.on.comm{background:var(--signal);color:#fff;}
+.coachcard{background:#fff;border:1px solid var(--line);border-radius:15px;padding:18px;margin-bottom:14px;position:relative;}
+.coachcard .route{display:inline-flex;align-items:center;gap:7px;font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:4px 10px;border-radius:20px;margin-bottom:11px;}
+.route.tech{background:#ecebef;color:var(--ink);}.route.comm{background:#fbe3df;color:var(--signal);}
+.coachcard .q{font-size:13px;color:var(--stone);font-style:italic;margin-bottom:9px;}
+.coachcard .a{font-size:14.5px;line-height:1.6;}.coachcard .a b{color:var(--crimson);}
+.srcs{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px;padding-top:12px;border-top:1px solid #f1e7e3;}
+.src2{font-size:11.5px;color:var(--stone);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:5px 9px;display:flex;align-items:center;gap:6px;}
+.src2 svg{width:13px;height:13px;color:var(--signal);}
+.latency{position:absolute;top:16px;right:16px;font-family:var(--disp);font-size:11px;color:var(--tail);font-weight:600;}
+.actbox{background:var(--ink);color:#fff;border-radius:15px;padding:18px 20px;}
+.actbox h4{font-size:11.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--glow);margin-bottom:13px;display:flex;align-items:center;gap:8px;}
+.actbox .ai{display:flex;gap:11px;font-size:13.5px;padding:9px 0;border-top:1px solid rgba(255,255,255,.1);}
+.actbox .ai:first-of-type{border-top:none;}
+.actbox .ai .ck2{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--glow);flex:none;margin-top:1px;}
+
+.foot{background:var(--night);color:rgba(255,255,255,.5);padding:34px 0;font-size:12.5px;margin-top:40px;}
+.foot .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;}
+.foot .wm{font-family:var(--mark);font-weight:800;letter-spacing:.12em;color:#fff;font-size:14px;}
+
+@media(max-width:920px){
+  .dashgrid,.grid2,.leadgrid,.metricgrid,.agentgrid{grid-template-columns:1fr;}
+  .kpis{grid-template-columns:1fr 1fr;}
+  .scorehead{grid-template-columns:1fr;text-align:center;}
+  .tabs{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav class="nav">
+  <div class="wrap">
+    <div class="brand" onclick="show('overview')">
+      <svg class="mk" viewBox="0 0 40 40" fill="none">
+        <circle cx="22" cy="20" r="11" fill="#F0402F"/><circle cx="9" cy="12" r="5" fill="#F0402F"/>
+        <circle cx="13" cy="28" r="4" fill="#C8362C"/><circle cx="31" cy="9" r="3.4" fill="#F0402F"/>
+        <circle cx="33" cy="29" r="2.6" fill="#C8362C"/>
+      </svg>
+      <span class="wm">CHROMO<b>LOGICS</b></span>
+    </div>
+    <div class="tabs">
+      <button id="t-overview" class="on" onclick="show('overview')">Overview</button>
+      <button id="t-monthly" onclick="show('monthly')">Monthly assessment</button>
+      <button id="t-leads" onclick="show('leads')">Leads Radar</button>
+      <button id="t-agent" onclick="show('agent')">Sales Agent</button>
+      <button id="t-coach" onclick="show('coach')">Sales Coach</button>
+    </div>
+    <div class="cta">
+      <span class="live"><span class="dot"></span> live</span>
+      <div class="avatar">H</div>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ OVERVIEW / DASHBOARD ============ -->
+<div id="view-overview" class="view on">
+  <div class="app"><div class="wrap">
+    <div class="hello">
+      <div class="day">Onsdag · 17. juni 2026</div>
+      <h2>God morgen, Henrik 👋</h2>
+      <p>Du har <b>3 møder</b>, <b>5 opgaver</b> og <b>4 leads at kontakte</b> i dag. Vigtigst: NordBeverage-demoen kl. 11:00 — agenten har forberedt stabilitetsdata. En ny konkurrent-alert berører din Arla-deal.</p>
+      <div class="quick">
+        <div class="q"><div class="n"><b>3</b></div><div class="l">møder i dag</div></div>
+        <div class="q"><div class="n">5</div><div class="l">opgaver</div></div>
+        <div class="q"><div class="n">4</div><div class="l">leads at kontakte</div></div>
+        <div class="q"><div class="n">€1,8M</div><div class="l">aktiv pipeline</div></div>
+      </div>
+    </div>
+
+    <div class="dashgrid">
+      <!-- col 1: schedule -->
+      <div class="col">
+        <div class="panel">
+          <div class="ph"><h3>Dagens program</h3><span class="meta">3 møder</span></div>
+          <div class="tl">
+            <div class="ev"><div class="time">09:30</div><div class="body"><div class="ttl">Intern: pipeline-review</div><div class="dsc">Med commercial lead · 30 min</div></div></div>
+            <div class="ev now"><div class="time">11:00</div><div class="body"><div class="badge2">● Næste — om 40 min</div><div class="ttl">NordBeverage A/S — teknisk demo</div><div class="dsc">Sportsdrik, lav pH · agenten har klargjort FT-2024-118</div></div></div>
+            <div class="ev"><div class="time">13:30</div><div class="body"><div class="ttl">Arla — opfølgning yoghurt-SKU</div><div class="dsc">Carmine-switch · se konkurrent-alert nedenfor</div></div></div>
+            <div class="ev"><div class="time">15:00</div><div class="body"><div class="ttl">Discovery: Tymphany Foods</div><div class="dsc">Nyt lead fra Radar · fit 88</div></div></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="ph"><h3>Heads-up i dag</h3><span class="meta">fra Intelligence & Coach</span></div>
+          <div class="sig red">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></div>
+            <div><b>Debut + Oterra Red 40-alliance</b> berører din Arla-deal — forbered svar på "hvorfor ikke vente på dem?"<div class="sx">Kilde: Monthly assessment · juni</div></div>
+          </div>
+          <div class="sig green">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5L20 6"/></svg></div>
+            <div><b>Coach-nudge:</b> Sidste 3 opkald talte du 62% af tiden — sæt ét åbent spørgsmål tidligt i NordBeverage-demoen.<div class="sx">Fra Sales Coach</div></div>
+          </div>
+          <div class="sig blue">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div>
+            <div><b>Tailwind:</b> US dye phase-out hærder mod slut-2026 — stærk åbner til alle reformulerings-samtaler.<div class="sx">Kilde: Monthly assessment</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- col 2: tasks -->
+      <div class="col">
+        <div class="panel">
+          <div class="ph"><h3>Opgaver</h3><span class="meta">5 · 2 forfalder i dag</span></div>
+          <div class="task"><span class="ck" onclick="this.classList.toggle('done')"></span><span>Send FT-2024-118 stabilitetsdata til NordBeverage</span><span class="pri pri-h">I dag</span></div>
+          <div class="task"><span class="ck" onclick="this.classList.toggle('done')"></span><span>Udregn cost-in-use vs. carmine for Arla</span><span class="pri pri-h">I dag</span></div>
+          <div class="task"><span class="ck" onclick="this.classList.toggle('done')"></span><span>Godkend udkast til outreach: Tymphany Foods</span><span class="pri pri-m">Denne uge</span></div>
+          <div class="task done"><span class="ck done" onclick="this.classList.toggle('done')"></span><span>Log noter fra Valio-kald i CRM</span><span class="pri pri-l">Auto</span></div>
+          <div class="task"><span class="ck" onclick="this.classList.toggle('done')"></span><span>Book teknisk follow-up med Bæng Confectionery</span><span class="pri pri-m">Denne uge</span></div>
+        </div>
+
+        <div class="panel">
+          <div class="ph"><h3>Pipeline denne uge</h3><span class="meta">5 aktive deals</span></div>
+          <div class="task" style="border:none"><span style="font-size:13.5px;font-weight:600">NordBeverage A/S</span><span class="chip c-tail" style="margin-left:auto">Demo</span></div>
+          <div class="task"><span style="font-size:13.5px;font-weight:600">Arla — yoghurt SKU</span><span class="chip c-med" style="margin-left:auto">Forhandling</span></div>
+          <div class="task"><span style="font-size:13.5px;font-weight:600">Bæng Confectionery</span><span class="chip c-blue" style="margin-left:auto">Trial</span></div>
+          <div class="task"><span style="font-size:13.5px;font-weight:600">Tymphany Foods</span><span class="chip c-neu" style="margin-left:auto">Discovery</span></div>
+        </div>
+      </div>
+
+      <!-- col 3: leads to contact -->
+      <div class="col">
+        <div class="panel">
+          <div class="ph"><h3>Leads at kontakte i dag</h3><span class="meta">fra Radar</span></div>
+          <div class="lc"><div class="lg">TF</div><div><div class="nm">Tymphany Foods ApS</div><div class="rsn">Lancerer vegansk linje — carmine-exit</div></div><span class="go">Skriv →</span></div>
+          <div class="lc"><div class="lg">BC</div><div><div class="nm">Bæng Confectionery A/S</div><div class="rsn">Red 3/40-eksponering, EU-marked</div></div><span class="go">Skriv →</span></div>
+          <div class="lc"><div class="lg">NM</div><div><div class="nm">Nordic Meals Group</div><div class="rsn">Ready-meals, clean-label re-formulering</div></div><span class="go">Skriv →</span></div>
+          <div class="lc"><div class="lg">FH</div><div><div class="nm">FruitHouse Nordic</div><div class="rsn">Smoothie-serie, naturlig farve-pivot</div></div><span class="go">Skriv →</span></div>
+          <div style="margin-top:14px"><button class="btn btn-line" style="width:100%" onclick="show('leads')">Åbn Leads Radar →</button></div>
+        </div>
+
+        <div class="panel" style="background:var(--ink);color:#fff;border:none">
+          <div class="ph"><h3 style="color:#fff">I aften — auto</h3></div>
+          <div style="font-size:13px;color:rgba(255,255,255,.78);line-height:1.6">Agenten samler dagens 4 kald, opdaterer CRM, og lægger 3 outreach-udkast klar til godkendelse. Sales Coach genberegner dine metrics.</div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ============ MONTHLY ASSESSMENT ============ -->
+<div id="view-monthly" class="view">
+  <div class="app"><div class="wrap">
+    <div class="appbar">
+      <div>
+        <div class="crumb">Monthly assessment</div>
+        <div class="t">Competitor & Regulatory Radar</div>
+        <div class="sub2">Hvad ændrede sig denne måned — og i hvis favør</div>
+      </div>
+      <div class="right">
+        <select class="select"><option>Juni 2026</option><option>Maj 2026</option><option>April 2026</option></select>
+        <button class="btn btn-line">Eksportér PDF</button>
+        <button class="btn btn-dark">Kør månedlig scan →</button>
+      </div>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><span class="strip" style="background:var(--tail)"></span><div class="k">Net position</div><div class="v">Styrket</div><div class="d up">↑ men stigende konkurrence</div></div>
+      <div class="kpi"><span class="strip" style="background:var(--head)"></span><div class="k">Trusler stigende</div><div class="v">2</div><div class="d up">↑ Phytolon · Debut+Oterra</div></div>
+      <div class="kpi"><span class="strip" style="background:var(--tail)"></span><div class="k">Medvind</div><div class="v">3</div><div class="d down">↑ US dye phase-out</div></div>
+      <div class="kpi"><span class="strip" style="background:var(--med)"></span><div class="k">High-impact events</div><div class="v">4</div><div class="d flat">i dette vindue</div></div>
+    </div>
+    <div class="grid2">
+      <div>
+        <div class="alert">
+          <div class="lbl"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg> Immediate attention</div>
+          <ul>
+            <li><span class="pill">High</span><span><b>Phytolon</b> lukkede en <b>$23,6M Series B</b> for at kommercialisere gær-fermenteret rødbede-rød i USA.</span></li>
+            <li><span class="pill">High</span><span><b>Debut + Oterra</b> partnerskab for at skalere et <b>precision-fermentation Red 40-alternativ</b> — markedslederen er inde i fermenteret rød.</span></li>
+            <li><span class="pill">High</span><span><b>FDA hold på GM-gær rødbede-rød</b> efter GMO-mærknings-indsigelse — åbning for Natu.Red®'s non-GMO platform.</span></li>
+          </ul>
+        </div>
+        <div class="panel">
+          <div class="ph"><h3>In-window change log</h3><span class="meta">~3. maj – 17. jun 2026</span></div>
+          <table>
+            <thead><tr><th>Storyline</th><th>Entitet</th><th>Ændring</th><th>Impact</th><th>Retning for CHR</th></tr></thead>
+            <tbody>
+              <tr><td>Series B til US-launch</td><td>Phytolon</td><td class="tg">🆕 Ny</td><td><span class="chip c-hi">High</span></td><td><span class="chip c-head">Modvind ↑</span></td></tr>
+              <tr><td>Red 40-fermentering</td><td>Debut / Oterra</td><td class="tg">🆕 Ny</td><td><span class="chip c-hi">High</span></td><td><span class="chip c-head">Modvind ↑</span></td></tr>
+              <tr><td>US dye phase-out 2026</td><td>FDA / HHS</td><td class="tg">⬆ Eskalerer</td><td><span class="chip c-hi">High</span></td><td><span class="chip c-tail">Medvind ↑</span></td></tr>
+              <tr><td>Hold på GM-farver</td><td>FDA</td><td class="tg">🆕 Ny</td><td><span class="chip c-med">Med</span></td><td><span class="chip c-tail">Medvind →</span></td></tr>
+              <tr><td>$250M kapacitet (Prism)</td><td>Sensient</td><td class="tg">➡ Ongoing</td><td><span class="chip c-med">Med</span></td><td><span class="chip c-neu">Blandet →</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <div class="panel" style="margin-bottom:20px;background:var(--ink);color:#fff;border:none;">
+          <div class="ph"><h3 style="color:#fff">Net position-read</h3><span class="chip c-tail">Styrket</span></div>
+          <p style="font-size:13.5px;color:rgba(255,255,255,.8);line-height:1.6">Makro-billedet flyttede sig yderligere i Chromologics' favør: USA's udfasning af seks petroleum-farver mod slut-2026 konverteres til hård reformulerings-efterspørgsel, og stabile naturlige røde er den knappeste brik. Men konkurrence-intensiteten i fermenteret rød steg lige så hurtigt. Lyspunkt: FDA's hold på GM-gær rødbede-rød skærper fordelen ved non-GMO.</p>
+        </div>
+        <div class="panel">
+          <div class="ph"><h3>Trusels-dossierer</h3><span class="meta">vs. sidste måned</span></div>
+          <div class="dossier">
+            <div class="doss"><div class="top"><span class="co">Phytolon <small>IL · gær</small></span><span class="bd"><span class="chip c-head">↑ Stigende</span></span></div><p>$23,6M Series B til US-kommercialisering af rødbede-rød.</p></div>
+            <div class="doss"><div class="top"><span class="co">Debut Bio <small>US · cell-free</small></span><span class="bd"><span class="chip c-head">↑ Stigende</span></span></div><p>Oterra-partnerskab om Red 40-alternativ mod FDA-filing.</p></div>
+            <div class="doss t-med"><div class="top"><span class="co">Fermentalg <small>FR · alger</small></span><span class="bd"><span class="chip c-neu">→ Stabil</span></span></div><p>EFSA-opinion på Galdieria Blue; blå, ikke rød — lav trussel.</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ============ LEADS RADAR ============ -->
+<div id="view-leads" class="view">
+  <div class="app"><div class="wrap">
+    <div class="appbar">
+      <div>
+        <div class="crumb">Leads Radar</div>
+        <div class="t">Customer & Lead Discovery</div>
+        <div class="sub2">Auto-fundne virksomheder · profileret · matchet mod den rette product pitch</div>
+      </div>
+      <div class="right">
+        <select class="select"><option>Alle regioner</option><option>Norden</option><option>DACH</option><option>UK</option></select>
+        <button class="btn btn-dark">Scan for nye leads →</button>
+      </div>
+    </div>
+
+    <div class="radarbar">
+      <span style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--stone)">Filtre:</span>
+      <span class="fchip on">Alle (24)</span>
+      <span class="fchip">🆕 Nye denne uge (6)</span>
+      <span class="fchip">Carmine-exit</span>
+      <span class="fchip">Red 3/40-eksponering</span>
+      <span class="fchip">Fit ≥ 85</span>
+      <span class="fchip">Beverage</span>
+      <span class="fchip">Dairy</span>
+      <span class="fchip">Confectionery</span>
+    </div>
+
+    <div class="leadgrid">
+      <!-- lead 1 -->
+      <div class="lead">
+        <span class="new">🆕 Ny</span>
+        <div class="lh">
+          <div class="mono">TF</div>
+          <div><div class="co">Tymphany Foods ApS</div><div class="sub">Functional beverages · Aarhus, DK</div></div>
+          <div class="fit"><div class="ring">88</div><div class="fl">Fit</div></div>
+        </div>
+        <div class="prof">Producent af funktionelle sports- og wellness-drikke. Annoncerede netop en vegansk produktlinje og søger at fjerne carmine fra deres røde varianter inden Q4.</div>
+        <div class="kv">
+          <span class="k">CVR</span><span>38 29 10 43</span>
+          <span class="k">Branche</span><span>Drikkevarefremstilling (NACE 11.07)</span>
+          <span class="k">Kontakt</span><span>Mette Lind · Head of R&D · <span style="color:var(--signal)">mette@…</span></span>
+        </div>
+        <div class="why">
+          <div class="wt">Hvorfor Natu.Red® passer</div>
+          <p>Lav-pH drik (≈3,1) + vegansk claim = direkte match på stabilitet og clean-label. Carmine-exit fjerner allergen-mærkning.</p>
+          <span class="pitch">Pitch: pH/varme-stabilitet + vegansk/halal</span>
+        </div>
+        <div class="src"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg> Signal: pressemeddelelse om vegansk linje (FoodNav, 11. jun) · linket til RAG: <span style="color:var(--signal)">FT-2024-118</span></div>
+        <div class="acts"><button class="btn btn-red">Udkast outreach</button><button class="btn btn-line">Tilføj til pipeline</button></div>
+      </div>
+
+      <!-- lead 2 -->
+      <div class="lead">
+        <span class="new">🆕 Ny</span>
+        <div class="lh">
+          <div class="mono">BC</div>
+          <div><div class="co">Bæng Confectionery A/S</div><div class="sub">Slik & konfekture · Odense, DK</div></div>
+          <div class="fit"><div class="ring">85</div><div class="fl">Fit</div></div>
+        </div>
+        <div class="prof">Mellemstor slikproducent med eksport til EU og USA. Stærk eksponering mod Red 3 og Red 40 i geléprodukter — direkte ramt af US-udfasningen mod slut-2026.</div>
+        <div class="kv">
+          <span class="k">CVR</span><span>27 55 81 90</span>
+          <span class="k">Branche</span><span>Kakao, chokolade & sukkervarer (10.82)</span>
+          <span class="k">Kontakt</span><span>Jonas Bæk · Innovation Director</span>
+        </div>
+        <div class="why">
+          <div class="wt">Hvorfor Natu.Red® passer</div>
+          <p>Regulatorisk de-risking: skift fra Red 40 før deadline. Natu.Red®'s varmestabilitet håndterer gelé-kogning.</p>
+          <span class="pitch">Pitch: regulatory de-risking + USA-eksport</span>
+        </div>
+        <div class="src"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5"/></svg> Signal: eksporterer til US-marked · trend: dye phase-out · RAG: <span style="color:var(--signal)">WON-NordicDairy</span></div>
+        <div class="acts"><button class="btn btn-red">Udkast outreach</button><button class="btn btn-line">Tilføj til pipeline</button></div>
+      </div>
+
+      <!-- lead 3 -->
+      <div class="lead">
+        <div class="lh">
+          <div class="mono">NM</div>
+          <div><div class="co">Nordic Meals Group</div><div class="sub">Ready-meals · Malmö, SE</div></div>
+          <div class="fit"><div class="ring" style="color:var(--med)">78</div><div class="fl">Fit</div></div>
+        </div>
+        <div class="prof">Stor producent af færdigretter til nordisk retail. Clean-label re-formuleringsprogram annonceret; røde saucer og toppings bruger syntetiske farver i dag.</div>
+        <div class="kv">
+          <span class="k">Org.nr</span><span>556734-1188</span>
+          <span class="k">Branche</span><span>Færdigretter (10.85)</span>
+          <span class="k">Kontakt</span><span>Anna Sjöberg · Category Manager</span>
+        </div>
+        <div class="why">
+          <div class="wt">Hvorfor Natu.Red® passer</div>
+          <p>Volumen-spil. Stabilitet i sure saucer; clean-label er deres erklærede strategi for 2026–27.</p>
+          <span class="pitch">Pitch: clean-label retail + volumen</span>
+        </div>
+        <div class="src"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg> Signal: ESG-rapport nævner farve-reformulering · RAG: <span style="color:var(--signal)">value playbook</span></div>
+        <div class="acts"><button class="btn btn-red">Udkast outreach</button><button class="btn btn-line">Tilføj til pipeline</button></div>
+      </div>
+
+      <!-- lead 4 -->
+      <div class="lead">
+        <div class="lh">
+          <div class="mono">FH</div>
+          <div><div class="co">FruitHouse Nordic</div><div class="sub">Smoothies & juice · Oslo, NO</div></div>
+          <div class="fit"><div class="ring">82</div><div class="fl">Fit</div></div>
+        </div>
+        <div class="prof">Premium smoothie-brand i vækst. Markedsfører "kun naturlige ingredienser", men bruger stadig betanin med kendte stabilitetsproblemer i deres røde serie.</div>
+        <div class="kv">
+          <span class="k">Org.nr</span><span>918 442 771</span>
+          <span class="k">Branche</span><span>Frugt- & grøntsaftfremstilling (10.32)</span>
+          <span class="k">Kontakt</span><span>Henrik Sørli · Founder & CEO</span>
+        </div>
+        <div class="why">
+          <div class="wt">Hvorfor Natu.Red® passer</div>
+          <p>Erstat ustabil betanin → bedre holdbarhed og farve. Brand-narrativ matcher allerede naturlig farve.</p>
+          <span class="pitch">Pitch: stabilitet vs. betanin + brand-fit</span>
+        </div>
+        <div class="src"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5"/></svg> Signal: founder-interview om naturlig farve · RAG: <span style="color:var(--signal)">stabilitets-spec ANX-07</span></div>
+        <div class="acts"><button class="btn btn-red">Udkast outreach</button><button class="btn btn-line">Tilføj til pipeline</button></div>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ============ SALES AGENT ============ -->
+<div id="view-agent" class="view">
+  <div class="app"><div class="wrap">
+    <div class="appbar">
+      <div><div class="crumb">Sales Agent</div><div class="t">Live Call Coach</div><div class="sub2">To coaches lytter med — teknisk + commercial, auto-routed</div></div>
+      <div class="right"><button class="btn btn-line">Opkalds-historik</button><button class="btn btn-red">● Optager</button></div>
+    </div>
+    <div class="callbar">
+      <span class="rec"><span class="eq"><i></i><i></i><i></i><i></i><i></i></span> Lytter</span>
+      <span class="who">Kunde: <b>NordBeverage A/S</b> · applikation: <b>funktionel sportsdrik</b></span>
+      <span class="timer">14:23</span>
+    </div>
+    <div class="agentgrid">
+      <div class="transcript">
+        <div class="ph" style="margin-bottom:16px"><h3 style="font-family:var(--disp);font-size:15px">Live transskription</h3><span style="font-size:11.5px;color:var(--stone)">dansk · auto</span></div>
+        <div class="tline"><div class="av rep">DU</div><div><div class="nm">Sælger</div><div class="tx">…ja, Natu.Red® er fermentations-baseret og non-GMO, så den passer ind i jeres clean-label profil.</div></div></div>
+        <div class="tline flag"><div class="av cust">K</div><div><div class="nm">Kunde · indkøb</div><div class="tx">Men holder farven overhovedet i en drik med lav pH? Og hvad med varmebehandlingen under pasteurisering?</div></div></div>
+        <div class="tline"><div class="av cust">K</div><div><div class="nm">Kunde · indkøb</div><div class="tx">Og helt ærligt — I er dyrere end carmine. Det bliver svært at sælge internt.</div></div></div>
+        <div style="margin-top:14px;padding:11px;border:1px dashed var(--line);border-radius:10px;font-size:12.5px;color:var(--stone);display:flex;gap:9px;align-items:center"><span class="dot" style="background:var(--signal)"></span> Agenten opfangede 2 spørgsmål + 1 indvending → routed automatisk</div>
+      </div>
+      <div>
+        <div class="seg">
+          <button class="on tech" onclick="seg(this,'tech')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 2v6l-4 8a2 2 0 0 0 2 3h8a2 2 0 0 0 2-3l-4-8V2"/></svg> Teknisk coach</button>
+          <button onclick="seg(this,'comm')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Commercial coach</button>
+        </div>
+        <div class="coachcard">
+          <span class="latency">⚡ 84 ms</span>
+          <span class="route tech"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M10 2v6l-4 8a2 2 0 0 0 2 3h8a2 2 0 0 0 2-3l-4-8V2"/></svg> Teknisk · auto-routed</span>
+          <div class="q">"Holder farven i lav pH? Og under pasteurisering?"</div>
+          <div class="a"><b>Ja — sig dette:</b> Natu.Red® er stabil ned til <b>pH 2,8</b> og holder farven gennem HTST-pasteurisering (op til 95 °C / 30 s) med &lt;5 % tab. I food trial <b>FT-2024-118</b> (sportsdrik, pH 3,1) lå farvestabiliteten på 96 % efter 6 mdr. ved 25 °C — bedre end carmine i samme test.</div>
+          <div class="srcs"><span class="src2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg> FT-2024-118</span><span class="src2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg> Natu.Red® PI v3.2</span><span class="src2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg> Spec ANX-07</span></div>
+        </div>
+        <div class="coachcard">
+          <span class="latency">⚡ 91 ms</span>
+          <span class="route comm"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Commercial · indvending fanget</span>
+          <div class="q">Indvending: "I er dyrere end carmine — svært at sælge internt."</div>
+          <div class="a"><b>Reframe til total cost & risiko:</b> Carmine bærer skjulte omkostninger — allergen-mærkning, ikke-vegansk/halal, volatil supply. Vundet sag <b>WON-NordicDairy</b>: fjernede et allergen-claim og vandt en vegansk SKU. Brug doserings-fordelen: ~30 % lavere dosering → cost-in-use gap er mindre end listeprisen antyder.</div>
+          <div class="srcs"><span class="src2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5"/></svg> WON-NordicDairy</span><span class="src2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5"/></svg> Value playbook</span></div>
+        </div>
+        <div class="actbox">
+          <h4><span class="dot"></span> Actions fanget på dette opkald</h4>
+          <div class="ai"><span class="ck2"></span><span>Send FT-2024-118 + Natu.Red® PI til indkøb.</span></div>
+          <div class="ai"><span class="ck2"></span><span>Udregn cost-in-use sammenligning vs. carmine.</span></div>
+          <div class="ai"><span class="ck2"></span><span>Følg op: intern business case til at sælge skiftet opad.</span></div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ============ SALES COACH ============ -->
+<div id="view-coach" class="view">
+  <div class="app"><div class="wrap">
+    <div class="appbar">
+      <div><div class="crumb">Sales Coach</div><div class="t">Samtale-metrics & udvikling</div><div class="sub2">Lær af mønstrene — se din forbedring opkald for opkald</div></div>
+      <div class="right"><select class="select"><option>Sidste 30 dage</option><option>Sidste 8 opkald</option><option>Dette kvartal</option></select></div>
+    </div>
+
+    <div class="scorehead">
+      <div class="bigscore">
+        <div class="ns">74<small>/100</small></div>
+        <div class="lb">Coach-score</div>
+        <div class="delta">▲ +9 vs. sidste måned</div>
+      </div>
+      <div class="msg"><b>Du udvikler dig stærkt på discovery og indvendings-håndtering.</b> Største mønster at bryde: du taler for meget tidligt i kaldet (62% talk-ratio) og holder lange monologer på teknik. De opkald hvor du satte et åbent spørgsmål i de første 2 minutter, lukkede 2× oftere til næste skridt.</div>
+    </div>
+
+    <div class="grid2" style="margin-bottom:20px">
+      <!-- metrics -->
+      <div class="panel">
+        <div class="ph"><h3>Dine kerne-metrics</h3><span class="meta">gns. sidste 8 opkald · ● = mål</span></div>
+        <div class="mrow">
+          <div class="mt"><b>Talk / listen ratio</b><span class="val up">62 / 38</span></div>
+          <div class="bar"><i style="width:62%;background:var(--head)"></i><span class="target" style="left:45%"></span></div>
+          <div class="mhint">Mål: ≤45% taletid. Du taler stadig for meget — men ned fra 71% i april.</div>
+        </div>
+        <div class="mrow">
+          <div class="mt"><b>Åbne spørgsmål / opkald</b><span class="val down">6</span></div>
+          <div class="bar"><i style="width:75%;background:var(--tail)"></i><span class="target" style="left:62%"></span></div>
+          <div class="mhint">Mål: ≥5. Flot — op fra 4. Discovery bliver dybere.</div>
+        </div>
+        <div class="mrow">
+          <div class="mt"><b>Indvendings-håndtering</b><span class="val down">81%</span></div>
+          <div class="bar"><i style="width:81%;background:var(--tail)"></i><span class="target" style="left:75%"></span></div>
+          <div class="mhint">Andel af indvendinger besvaret med kilde/bevis. Stærkt.</div>
+        </div>
+        <div class="mrow">
+          <div class="mt"><b>Længste monolog</b><span class="val up">2:40</span></div>
+          <div class="bar"><i style="width:70%;background:var(--med)"></i><span class="target" style="left:40%"></span></div>
+          <div class="mhint">Mål: &lt;1:30. Du mister rummet på lange tekniske forklaringer.</div>
+        </div>
+        <div class="mrow">
+          <div class="mt"><b>Næste skridt sat</b><span class="val down">88%</span></div>
+          <div class="bar"><i style="width:88%;background:var(--tail)"></i><span class="target" style="left:80%"></span></div>
+          <div class="mhint">Mål: ≥80%. Du lukker næsten altid med en konkret aftale.</div>
+        </div>
+      </div>
+
+      <!-- trend -->
+      <div class="panel">
+        <div class="ph"><h3>Udvikling over tid</h3><span class="meta">coach-score pr. opkald</span></div>
+        <div class="trend">
+          <div class="tcol"><div class="bars"><i style="height:52%;background:var(--neutral)"></i></div><div class="lbl">K1</div></div>
+          <div class="tcol"><div class="bars"><i style="height:58%;background:var(--neutral)"></i></div><div class="lbl">K2</div></div>
+          <div class="tcol"><div class="bars"><i style="height:55%;background:var(--neutral)"></i></div><div class="lbl">K3</div></div>
+          <div class="tcol"><div class="bars"><i style="height:64%;background:var(--med)"></i></div><div class="lbl">K4</div></div>
+          <div class="tcol"><div class="bars"><i style="height:68%;background:var(--med)"></i></div><div class="lbl">K5</div></div>
+          <div class="tcol"><div class="bars"><i style="height:72%;background:var(--tail)"></i></div><div class="lbl">K6</div></div>
+          <div class="tcol"><div class="bars"><i style="height:70%;background:var(--tail)"></i></div><div class="lbl">K7</div></div>
+          <div class="tcol"><div class="bars"><i style="height:80%;background:var(--tail)"></i></div><div class="lbl">K8</div></div>
+        </div>
+        <div class="legend"><span><i style="background:var(--neutral)"></i> Under mål</span><span><i style="background:var(--med)"></i> På vej</span><span><i style="background:var(--tail)"></i> På/over mål</span></div>
+
+        <div style="margin-top:22px">
+          <div class="ph"><h3 style="font-size:15px">Mønstre</h3></div>
+          <div class="patterns">
+            <div class="pat win"><span class="pi">▲ Styrke</span><span>Du bruger <b>kilder/bevis</b> konsekvent når indvendinger opstår — det skaber tillid.</span></div>
+            <div class="pat win"><span class="pi">▲ Styrke</span><span>Bedre <b>discovery-dybde</b>: flere åbne spørgsmål, færre ja/nej.</span></div>
+            <div class="pat grow"><span class="pi">△ Vækst</span><span><b>Tal mindre tidligt.</b> Dine bedste kald åbnede med et spørgsmål, ikke en præsentation.</span></div>
+            <div class="pat grow"><span class="pi">△ Vækst</span><span><b>Kortere tekniske svar.</b> Del op i 2–3 sætninger, tjek ind, fortsæt.</span></div>
+          </div>
+          <div class="coachtip">
+            <div class="ct"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2zM9 21h6"/></svg> Konkret tip fra dit sidste kald</div>
+            Da kunden spurgte til pH-stabilitet, talte du i 2:40 før du tjekkede ind. <b>Næste gang:</b> giv tallet (pH 2,8, &lt;5% tab), referér <b>FT-2024-118</b>, og spørg "giver det mening for jeres proces?" — så holder du dialogen i gang.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- recent calls -->
+    <div class="panel">
+      <div class="ph"><h3>Seneste opkald</h3><span class="meta">klik for fuld coaching-gennemgang</span></div>
+      <div class="callrow"><div class="sc up" style="color:var(--tail)">80</div><div class="ci"><div style="font-weight:600">Valio — strawberry yogurt</div><div class="cs">16. jun · 28 min · indvendings-håndtering ▲ · talk 54%</div></div><span class="chip c-tail">Næste skridt sat</span></div>
+      <div class="callrow"><div class="sc" style="color:var(--tail)">70</div><div class="ci"><div style="font-weight:600">Bæng Confectionery — discovery</div><div class="cs">13. jun · 41 min · god discovery · monolog 3:10 △</div></div><span class="chip c-med">Lang monolog</span></div>
+      <div class="callrow"><div class="sc" style="color:var(--med)">68</div><div class="ci"><div style="font-weight:600">FruitHouse — intro</div><div class="cs">11. jun · 22 min · talk 66% △ · 4 åbne spørgsmål</div></div><span class="chip c-med">Tal mindre</span></div>
+      <div class="callrow"><div class="sc" style="color:var(--tail)">72</div><div class="ci"><div style="font-weight:600">Nordic Meals — teknisk</div><div class="cs">9. jun · 35 min · stærk på bevis · næste skridt sat</div></div><span class="chip c-tail">Solid</span></div>
+    </div>
+
+    <div class="panel" style="margin-top:20px;background:var(--ink);color:#fff;border:none">
+      <div class="ph"><h3 style="color:#fff">Snart: email-coaching</h3><span class="chip c-tail">På vej</span></div>
+      <div style="font-size:13.5px;color:rgba(255,255,255,.78);line-height:1.6">Når email kobles på, kommunikerer du med kunden direkte herfra med auto-hjælp fra RAG — og Coach analyserer også dine skrevne svar. Samtidig opsnappes nye produkttest-resultater, market- og competitor-insights fra dine tråde og føres tilbage til vidensbasen.</div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ============ FOOTER ============ -->
+<footer class="foot">
+  <div class="wrap">
+    <span class="wm">CHROMO<span style="color:var(--glow)">LOGICS</span></span>
+    <span>Natu.Red® Sales Intelligence Platform · designprototype</span>
+    <span>Overview · Monthly assessment · Leads Radar · Sales Agent · Sales Coach</span>
+  </div>
+</footer>
+
+<script>
+function show(v){
+  document.querySelectorAll('.view').forEach(e=>e.classList.remove('on'));
+  document.getElementById('view-'+v).classList.add('on');
+  ['overview','monthly','leads','agent','coach'].forEach(id=>{
+    var b=document.getElementById('t-'+id);
+    if(b) b.classList.toggle('on', id===v);
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function seg(btn,type){
+  btn.parentNode.querySelectorAll('button').forEach(b=>b.classList.remove('on','tech','comm'));
+  btn.classList.add('on',type);
+}
+</script>
+</body>
+</html>

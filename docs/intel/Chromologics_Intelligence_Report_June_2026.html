@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chromologics — Monthly Competitor Intelligence — June 2026</title>
+<style>
+  :root{
+    --crimson:#9B1B30;--terracotta:#BE3A28;--powder:#B11226;
+    --pink-row:#FAE3DD;--pink-soft:#FCEFEB;--ink:#231f20;--muted:#7a7470;--line:#e7ddd9;
+    --hi:#D64545;--med:#E08A3C;--lo:#E6C34A;--tail:#2E8B57;--head:#C0392B;--neutral:#9a9591;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;color:var(--ink);background:#d8d2cf;font-size:10.3px;line-height:1.42;}
+  .page{width:210mm;min-height:297mm;background:#fff;margin:10mm auto;padding:14mm 15mm 18mm;position:relative;box-shadow:0 2px 14px rgba(0,0,0,.18);}
+  .mast{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid var(--crimson);padding-bottom:8px;margin-bottom:12px;}
+  .logo img{height:34px;width:auto;display:block;}
+  .doc{text-align:right;}
+  .doc .kicker{font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--terracotta);font-weight:700;}
+  .doc .period{font-size:13px;font-weight:700;color:var(--ink);}
+  .doc .sub{font-size:8.5px;color:var(--muted);}
+  h1.page-title{font-size:21px;font-weight:300;color:var(--crimson);margin:2px 0 10px;letter-spacing:.3px;}
+  h2.sec{font-size:12.5px;color:var(--terracotta);font-weight:700;margin:15px 0 6px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--line);padding-bottom:3px;}
+  h3.sub{font-size:10.5px;color:var(--crimson);font-weight:700;margin:11px 0 4px;}
+  p{margin:5px 0;}
+  a{color:var(--terracotta);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+  .src{font-size:8.3px;color:var(--muted);}
+  .src a{color:#9b5b4e;}
+  .hint{font-size:8.2px;color:var(--muted);font-style:italic;}
+  .baseline{background:#fff8e8;border:1px solid #e8d59a;border-radius:5px;padding:6px 10px;font-size:8.8px;color:#7a6a32;margin:0 0 10px;}
+  .alert{border:1.5px solid var(--hi);background:#fdecec;border-radius:6px;padding:9px 11px;margin:0 0 12px;}
+  .alert .lbl{color:var(--hi);font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;}
+  .alert ul{margin:5px 0 0;padding-left:18px;}
+  .alert li{margin:3px 0;}
+  .netread{background:var(--pink-row);border-left:5px solid var(--crimson);border-radius:4px;padding:9px 12px;margin:6px 0 10px;}
+  .netread .tag{font-weight:700;color:var(--crimson);text-transform:uppercase;font-size:8.8px;letter-spacing:1px;}
+  table{width:100%;border-collapse:collapse;margin:6px 0 4px;font-size:9.1px;}
+  thead th{background:var(--terracotta);color:#fff;text-align:left;padding:6px 7px;font-weight:700;font-size:8.7px;letter-spacing:.3px;vertical-align:top;}
+  tbody td{padding:5px 7px;border-bottom:1px solid var(--line);vertical-align:top;}
+  tbody tr:nth-child(even){background:var(--pink-soft);}
+  td.center,th.center{text-align:center;}
+  .chip{display:inline-block;padding:1px 6px;border-radius:9px;font-size:7.7px;font-weight:700;color:#fff;white-space:nowrap;}
+  .c-hi{background:var(--hi);} .c-med{background:var(--med);} .c-lo{background:var(--lo);color:#5a4a00;}
+  .c-tail{background:var(--tail);} .c-head{background:var(--head);} .c-neu{background:var(--neutral);}
+  .arrow{font-weight:700;}
+  .up{color:var(--head);} .down{color:var(--tail);} .flat{color:var(--neutral);}
+  .legend{display:flex;flex-wrap:wrap;gap:5px 14px;font-size:8.3px;color:var(--muted);margin:4px 0 2px;}
+  .legend b{color:var(--ink);}
+  .cols{display:flex;gap:14px;}
+  .cols>div{flex:1;}
+  .card{border:1px solid var(--line);border-radius:5px;padding:8px 10px;margin:6px 0;break-inside:avoid;}
+  .card .top{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:4px;margin-bottom:5px;}
+  .card .name{font-weight:700;color:var(--crimson);font-size:11px;}
+  .card .meta{font-size:8.2px;color:var(--muted);text-align:right;}
+  .kv{display:grid;grid-template-columns:70px 1fr;gap:2px 8px;font-size:9px;}
+  .kv .k{color:var(--muted);font-weight:700;}
+  .foot{position:absolute;bottom:8mm;left:15mm;right:15mm;display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:5px;font-size:7.6px;color:var(--muted);}
+  .conf{font-weight:700;color:var(--crimson);}
+  @media print{
+    body{background:#fff;font-size:9.6px;}
+    .page{margin:0;box-shadow:none;width:auto;min-height:auto;padding:12mm 13mm 16mm;}
+    .page+.page{page-break-before:always;}
+    @page{size:A4;margin:0;}
+    a{color:var(--ink);}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== PAGE 1 ===================== -->
+<section class="page">
+  <div class="mast">
+    <div class="logo"><img src="Chromologics-logo-raleway-.png" alt="Chromologics"></div>
+    <div class="doc">
+      <div class="kicker">Monthly Competitor Intelligence</div>
+      <div class="period">June 2026</div>
+      <div class="sub">Coverage ~3 May – 17 Jun 2026 · vs May 2026 · Run 17 Jun 2026</div>
+    </div>
+  </div>
+
+  <h1 class="page-title">Page 1 — Executive Summary &amp; What Changed</h1>
+
+  <div class="baseline"><b>Baseline month.</b> No prior structured snapshot and no Airtable connected, so month-over-month deltas begin next run. Change tags below reflect what is <i>new or active in-window</i>; longer-running storylines are dated and marked Ongoing for context.</div>
+
+  <div class="alert">
+    <span class="lbl">⚠ Immediate attention</span>
+    <ul>
+      <li><b>Phytolon</b> closed a <b>$23.6M Series B</b> (26 May 2026) to commercialise its yeast-fermentation beetroot red in the US — the best-funded fermentation-red startup just extended its lead. <span class="src"><a href="https://www.prnewswire.com/news-releases/phytolon-closes-23-6-million-series-b-to-commercialize-its-innovative-natural-food-colors-302781241.html">PR Newswire</a></span></li>
+      <li><b>Debut + Oterra</b> launched a multi-million-dollar partnership (6 May 2026) to scale a <b>precision-fermentation Red 40 alternative</b> (orange/red/violet), targeting an FDA filing and commercial product in ~3 years — the natural-color market leader has entered fermentation red directly. <span class="src"><a href="https://www.prnewswire.com/news-releases/debut-and-oterra-partner-to-develop-and-scale-biotech-alternative-to-red-40-for-food-and-beverage-302764178.html">PR Newswire</a></span></li>
+      <li><b>FDA put Phytolon's GM-yeast beetroot red on hold</b> (effective date delayed 25 Mar 2026) after a GMO-labeling objection — a differentiator opening for Chromologics' non-GMO Natu.Red®. <span class="src"><a href="https://www.foodnavigator-usa.com/Article/2026/03/31/fda-pauses-beetroot-red-and-spirulina-color-approvals/">FoodNavigator-USA</a></span></li>
+    </ul>
+  </div>
+
+  <h2 class="sec">Section 0 · What changed (in-window)</h2>
+  <div class="netread">
+    <span class="tag">Net position read — <span style="color:var(--ink)">Strengthened (with rising competition)</span></span>
+    <p style="margin:4px 0 0">The macro backdrop moved further in Chromologics' favour: the US end-2026 phase-out of six petroleum dyes (Red 40, Yellow 5/6, Blue 1/2, Green 3) is converting into hard reformulation demand, and stable natural reds are the scarcest piece of that puzzle — exactly Natu.Red®'s value proposition. But competitive intensity in fermentation red rose just as fast this period: Phytolon's $23.6M raise and the Debut+Oterra Red 40 alliance both landed in-window, raising the risk that a rival fermentation red reaches US scale first. A genuine bright spot is the FDA's hold on Phytolon's GM-yeast beetroot red over GMO-labeling objections, which sharpens the relative advantage of Chromologics' non-GMO platform. Net: tailwinds outweigh headwinds, but the window to convert regulatory progress into first-mover advantage is narrowing.</p>
+  </div>
+
+  <h3 class="sub">Top movements this period</h3>
+  <div class="legend">
+    <span><b>🆕 NEW</b> first appearance</span><span><b>⬆ ESCALATING</b> higher stakes</span>
+    <span><b>➡ ONGOING</b> steady</span><span><b>⬇ COOLING</b> losing momentum</span><span><b>✅ RESOLVED</b> concluded</span>
+  </div>
+  <ol style="margin:4px 0;padding-left:18px;">
+    <li>🆕 <b>Phytolon $23.6M Series B</b> — Headwind for CHR (a direct fermentation-red rival is now well-capitalised for US launch).</li>
+    <li>🆕 <b>Debut + Oterra Red 40 fermentation partnership</b> — Headwind (market leader validates and enters the category), but Tailwind for the category narrative overall.</li>
+    <li>⬆ <b>US synthetic-dye phase-out hardening toward end-2026</b> — Tailwind, strengthening; reformulation demand for stable natural reds accelerating.</li>
+    <li>🆕 <b>FDA hold on GM-yeast beetroot red &amp; spirulina</b> — Tailwind for non-GMO positioning; Headwind for GM-fermentation peers.</li>
+    <li>➡ <b>Capacity build-out by incumbents (Sensient $250M)</b> — Headwind on supply, Tailwind on category legitimacy.</li>
+  </ol>
+
+  <h3 class="sub">In-window change log</h3>
+  <table>
+    <thead><tr><th style="width:20%">Storyline</th><th style="width:13%">Entity</th><th style="width:8%" class="center">Change</th><th style="width:30%">What happened</th><th style="width:9%" class="center">Impact</th><th style="width:20%">Direction for CHR</th></tr></thead>
+    <tbody>
+      <tr><td>phytolon-seriesB</td><td>Phytolon</td><td class="center">🆕</td><td>$23.6M Series B to commercialise beetroot red (US)</td><td class="center"><span class="chip c-hi">High</span></td><td><span class="chip c-head">Headwind ↑</span></td></tr>
+      <tr><td>debut-oterra-red40</td><td>Debut / Oterra</td><td class="center">🆕</td><td>Partnership to scale fermentation Red 40 alternative</td><td class="center"><span class="chip c-hi">High</span></td><td><span class="chip c-head">Headwind ↑</span></td></tr>
+      <tr><td>us-dye-phaseout</td><td>FDA / HHS</td><td class="center">⬆</td><td>6 dyes targeted for removal by end-2026; ~40% of supply pledged</td><td class="center"><span class="chip c-hi">High</span></td><td><span class="chip c-tail">Tailwind ↑</span></td></tr>
+      <tr><td>fda-gm-color-hold</td><td>FDA</td><td class="center">🆕</td><td>Beetroot red &amp; spirulina effective dates delayed on objections</td><td class="center"><span class="chip c-med">Med</span></td><td><span class="chip c-tail">Tailwind →</span></td></tr>
+      <tr><td>sensient-prism-capex</td><td>Sensient</td><td class="center">➡</td><td>$250M "Project Prism" natural-color capacity expansion</td><td class="center"><span class="chip c-med">Med</span></td><td><span class="chip c-neu">Mixed →</span></td></tr>
+      <tr><td>fermentalg-galdieria-eu</td><td>Fermentalg</td><td class="center">⬆</td><td>EFSA favourable opinion on Galdieria Blue; record Q1</td><td class="center"><span class="chip c-med">Med</span></td><td><span class="chip c-neu">Neutral →</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2 class="sec">Executive summary</h2>
+  <div class="cols">
+    <div>
+      <h3 class="sub">Top developments this period</h3>
+      <ol style="margin:4px 0;padding-left:16px;">
+        <li><b>Phytolon</b> closed a $23.6M Series B (26 May) backed by Millennium Foodtech, NGN, Colorcon Ventures and Yossi Ackerman to commercialise beetroot red in the US.</li>
+        <li><b>Debut &amp; Oterra</b> formed a multi-million partnership (6 May) to scale a precision-fermentation Red 40 alternative across orange–red–violet shades.</li>
+        <li><b>FDA</b> delayed the effective dates of beetroot red and spirulina (25 Mar) after objections, citing GMO/precision-fermentation labeling concerns.</li>
+        <li><b>Sensient</b> began its $250M "Project Prism" natural-color expansion (Mar) and is targeting $1B in natural-color sales.</li>
+        <li><b>Fermentalg</b> won an EFSA favourable opinion for Galdieria Blue (Mar) and posted a record Q1 2026 (€3.7M); FY25 €13.4M, +17%.</li>
+        <li><b>Octarine Bio (DK)</b> closed a €12.8M Series A (Jan) with dsm-firmenich Ventures joining; PurePalette™ rollout expected in 2026.</li>
+      </ol>
+      <h3 class="sub">Why they matter</h3>
+      <p>Two well-capitalised fermentation-red programs (Phytolon; Debut+Oterra) are now racing toward US scale on the same end-2026 regulatory clock as Chromologics — but both target beetroot/Red 40 economics, and Phytolon's GM-yeast route just hit a labeling snag that Natu.Red®'s non-GMO story can exploit. The phase-out and incumbent capex confirm the demand wave Natu.Red® is built for.</p>
+    </div>
+    <div>
+      <h3 class="sub">Key risks &amp; opportunities</h3>
+      <div class="card" style="background:var(--pink-soft);border-color:#e3b9ae;margin-top:2px;">
+        <b>Risks</b> — A rival fermentation red (Phytolon, or Debut/Oterra with market-leader distribution) reaches US commercial scale before Natu.Red® clears EFSA/FDA. Incumbent capacity (Sensient $250M) compresses pricing for natural reds.<br><br>
+        <b>Opportunities</b> — Position Natu.Red® as the <i>non-GMO, heat/pH-stable</i> red as GMO-fermentation peers face labeling objections. Lean into <b>Red 3 / Red 40 / carmine replacement</b> — carmine's price volatility and insect origin keep buyers actively seeking a stable, vegan, halal/kosher red.</div>
+      <h3 class="sub">Recommended actions</h3>
+      <ol style="margin:4px 0;padding-left:16px;">
+        <li>Accelerate and publicise EFSA/FDA submission milestones; the end-2026 clock rewards visible regulatory momentum.</li>
+        <li>Sharpen non-GMO messaging in light of the FDA's GM-color hold — make it a front-line differentiator vs Phytolon/Debut.</li>
+        <li>Prioritise carmine-replacement accounts (vegan/halal/kosher, insect-free) where Natu.Red® stability wins today.</li>
+        <li>Re-engage Döhler (now an investor via Döhler Ventures) as a route-to-market channel.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="foot"><span class="conf">Confidential — proprietary business information of Chromologics</span><span>Page 1 of 3</span></div>
+</section>
+
+<!-- ===================== PAGE 2 ===================== -->
+<section class="page">
+  <div class="mast">
+    <div class="logo"><img src="Chromologics-logo-raleway-.png" alt="Chromologics"></div>
+    <div class="doc"><div class="kicker">Monthly Competitor Intelligence</div><div class="period">June 2026</div><div class="sub">Page 2 · Competitor updates</div></div>
+  </div>
+
+  <h1 class="page-title">Page 2 — Competitor Updates</h1>
+
+  <h2 class="sec">Threat trajectory at a glance</h2>
+  <table>
+    <thead><tr><th style="width:16%">Company</th><th style="width:15%">Segment</th><th style="width:9%" class="center">Threat</th><th style="width:13%" class="center">Trajectory</th><th style="width:7%" class="center">Tag</th><th style="width:40%">Rationale</th></tr></thead>
+    <tbody>
+      <tr><td><b>Phytolon</b></td><td>Emerging ferment.</td><td class="center"><span class="chip c-hi">High</span></td><td class="center"><span class="arrow up">Rising ↑</span></td><td class="center">🆕</td><td>$23.6M Series B funds US commercialisation of beetroot red — most-funded direct fermentation-red rival.</td></tr>
+      <tr><td><b>Debut / Oterra</b></td><td>Ferment. × leader</td><td class="center"><span class="chip c-hi">High</span></td><td class="center"><span class="arrow up">Rising ↑</span></td><td class="center">🆕</td><td>Market leader pairs with cell-free biotech to build a Red 40 alternative — distribution + tech in one.</td></tr>
+      <tr><td><b>Michroma</b></td><td>Emerging ferment.</td><td class="center"><span class="chip c-hi">High</span></td><td class="center"><span class="arrow flat">Stable →</span></td><td class="center">➡</td><td>Tox studies done, FDA CAP in prep, 20+ LOIs, CJ scale-up — closest fermentation-red competitor, no new in-window raise.</td></tr>
+      <tr><td><b>Oterra</b></td><td>Direct color</td><td class="center"><span class="chip c-med">Med→High</span></td><td class="center"><span class="arrow up">Rising ↑</span></td><td class="center">⬆</td><td>Moves from extraction into fermentation red via Debut; still the global natural-color leader.</td></tr>
+      <tr><td><b>Sensient</b></td><td>Direct color</td><td class="center"><span class="chip c-med">Med</span></td><td class="center"><span class="arrow up">Rising ↑</span></td><td class="center">➡</td><td>$250M capacity build; targeting $1B natural-color sales — scale &amp; pricing pressure, not a fermentation-red threat yet.</td></tr>
+      <tr><td><b>Fermentalg</b></td><td>Emerging ferment.</td><td class="center"><span class="chip c-lo">Low</span></td><td class="center"><span class="arrow flat">Stable →</span></td><td class="center">⬆</td><td>Strong momentum but in blue (Galdieria), not red — adjacent, not directly competitive.</td></tr>
+      <tr><td><b>Octarine Bio</b></td><td>Adjacent ferment.</td><td class="center"><span class="chip c-lo">Low→Med</span></td><td class="center"><span class="arrow up">Rising ↑</span></td><td class="center">🆕</td><td>€12.8M Series A; full-spectrum PurePalette™ with food ambitions; dsm-firmenich Ventures backing.</td></tr>
+      <tr><td><b>GNT / Exberry</b></td><td>Direct color</td><td class="center"><span class="chip c-med">Med</span></td><td class="center"><span class="arrow flat">Stable →</span></td><td class="center">➡</td><td>Clean-label plant-based leader expanding MEA footprint; actively markets carmine replacement.</td></tr>
+    </tbody>
+  </table>
+
+  <h2 class="sec">Detailed updates</h2>
+  <div class="cols">
+    <div>
+      <div class="card">
+        <div class="top"><span class="name">Phytolon (IL)</span><span class="meta"><span class="arrow up">Rising ↑</span> · 🆕 New</span></div>
+        <div class="kv">
+          <span class="k">Update</span><span>Closed a $23.6M three-stage Series B (26 May) to commercialise yeast-fermentation beetroot red in the US; investors include Millennium Foodtech, NGN, Colorcon Ventures and Yossi Ackerman. US beetroot-red rule was finalised then delayed (see p.3).</span>
+          <span class="k">Source</span><span class="src"><a href="https://www.prnewswire.com/news-releases/phytolon-closes-23-6-million-series-b-to-commercialize-its-innovative-natural-food-colors-302781241.html">PR Newswire</a> · <a href="https://www.bevnet.com/pr/2026/05/26/phytolon-closes-236-million-series-b-to-commercialize-its-innovative-natural-food-colors">BevNET</a></span>
+          <span class="k">Relevance</span><span>Best-funded direct fermentation-red rival; GM-yeast route is its exposure.</span>
+          <span class="k">Threat</span><span><span class="chip c-hi">High</span></span>
+          <span class="k">Confidence</span><span>Confirmed</span>
+          <span class="k">Impact</span><span><span class="chip c-hi">High</span></span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="top"><span class="name">Debut + Oterra (US/DK)</span><span class="meta"><span class="arrow up">Rising ↑</span> · 🆕 New</span></div>
+        <div class="kv">
+          <span class="k">Update</span><span>Multi-million partnership (6 May) to scale Debut's precision fermentation into a Red 40 alternative spanning orange–red–violet; FDA filing planned, commercial product targeted in ~3 years.</span>
+          <span class="k">Source</span><span class="src"><a href="https://www.prnewswire.com/news-releases/debut-and-oterra-partner-to-develop-and-scale-biotech-alternative-to-red-40-for-food-and-beverage-302764178.html">PR Newswire</a> · <a href="https://www.fooddive.com/news/oterra-natural-color-red-food-dye-debut-partnership/819459/">Food Dive</a></span>
+          <span class="k">Relevance</span><span>Pairs market-leader distribution with biotech red — the most strategically dangerous combination on the board.</span>
+          <span class="k">Threat</span><span><span class="chip c-hi">High</span></span>
+          <span class="k">Confidence</span><span>Confirmed</span>
+          <span class="k">Impact</span><span><span class="chip c-hi">High</span></span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="top"><span class="name">Michroma (AR/US)</span><span class="meta"><span class="arrow flat">Stable →</span> · ➡ Ongoing</span></div>
+        <div class="kv">
+          <span class="k">Update</span><span>Completed tox studies for an FDA color additive petition; reports 20+ letters of intent and a dozen+ paid pilots; scaling via CJ CheilJedang (partnership Sept 2025). Won the Global Food Tech Award Americas heat.</span>
+          <span class="k">Source</span><span class="src"><a href="https://agfundernews.com/fermentation-will-power-next-wave-of-natural-colors-says-michroma-as-it-rides-maha-wave">AgFunderNews</a> · <a href="https://www.foodnavigator-usa.com/Article/2026/03/23/fermentation-food-colors-gain-traction-as-synthetic-dye-phaseout-nears/">FoodNavigator-USA</a></span>
+          <span class="k">Relevance</span><span>Closest fungal fermentation-red competitor; pH/heat-stable claim overlaps Natu.Red®.</span>
+          <span class="k">Threat</span><span><span class="chip c-hi">High</span></span>
+          <span class="k">Confidence</span><span>Likely</span>
+          <span class="k">Impact</span><span><span class="chip c-med">Medium</span></span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="top"><span class="name">Sensient (US)</span><span class="meta"><span class="arrow up">Rising ↑</span> · ➡ Ongoing</span></div>
+        <div class="kv">
+          <span class="k">Update</span><span>Launched "Project Prism", a $250M multi-year natural-color capacity and supply-chain expansion (St. Louis), targeting $1B natural-color sales with a conversion ramp expected H2 2026.</span>
+          <span class="k">Source</span><span class="src"><a href="https://www.prnewswire.com/news-releases/sensient-scales-up-natural-color-production-to-fuel-us-shift-from-synthetic-dyes-302725586.html">PR Newswire</a> · <a href="https://www.fooddive.com/news/sensient-natural-colors-investment-artificial-dyes/817934/">Food Dive</a></span>
+          <span class="k">Relevance</span><span>Scale &amp; pricing pressure on natural reds; not a fermentation-red threat (yet).</span>
+          <span class="k">Threat</span><span><span class="chip c-med">Medium</span></span>
+          <span class="k">Confidence</span><span>Confirmed</span>
+          <span class="k">Impact</span><span><span class="chip c-med">Medium</span></span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="top"><span class="name">Fermentalg (FR)</span><span class="meta"><span class="arrow flat">Stable →</span> · ⬆ Escalating</span></div>
+        <div class="kv">
+          <span class="k">Update</span><span>EFSA favourable opinion on Galdieria Blue (Mar); record Q1 2026 revenue €3.7M; FY25 €13.4M (+17%), targeting €20M in 2026; industrial scale-up funded by Huvepharma.</span>
+          <span class="k">Source</span><span class="src"><a href="https://www.actusnews.com/en/fermentalg/pr/2026/04/02/2025-annual-results-strong-sales-growth-expansion-of-the-customer-portfolio-and-biosolutions-and-strengthening-of-the-financial">Actusnews</a> · <a href="https://www.ideal-investisseur.fr/en/actions-b/fermentalg-record-revenue-of-eur3-7-million-in-q1-2026/18741.html">Ideal Investisseur</a></span>
+          <span class="k">Relevance</span><span>Proof that biotech colors clear EFSA/FDA — but blue, adjacent to Natu.Red®.</span>
+          <span class="k">Threat</span><span><span class="chip c-lo">Low</span></span>
+          <span class="k">Confidence</span><span>Confirmed</span>
+          <span class="k">Impact</span><span><span class="chip c-med">Medium</span></span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="top"><span class="name">Octarine Bio (DK)</span><span class="meta"><span class="arrow up">Rising ↑</span> · 🆕 New (rotating)</span></div>
+        <div class="kv">
+          <span class="k">Update</span><span>Closed €12.8M Series A (Jan) — dsm-firmenich Ventures joined; full-spectrum PurePalette™ precision-fermentation platform; industrial validation and rollout expected 2026 across textiles, food &amp; cosmetics.</span>
+          <span class="k">Source</span><span class="src"><a href="https://www.eu-startups.com/2026/01/copenhagens-octarine-bio-adds-e5-million-to-series-a-to-advance-sustainable-colour-platform">EU-Startups</a> · <a href="https://bebeez.eu/2026/01/23/danish-biotech-octarine-bio-closes-e12-8-million-series-a-for-sustainable-pigments/">BeBeez</a></span>
+          <span class="k">Relevance</span><span>Danish peer with food ambitions and a strategic-ingredient backer; watch for a food-red move.</span>
+          <span class="k">Threat</span><span><span class="chip c-lo">Low→Med</span></span>
+          <span class="k">Confidence</span><span>Confirmed</span>
+          <span class="k">Impact</span><span><span class="chip c-med">Medium</span></span>
+        </div>
+      </div>
+      <div class="card" style="border-style:dashed;border-color:#e3b9ae;background:var(--pink-soft);">
+        <div class="top"><span class="name" style="color:var(--terracotta)">Chromologics — internal benchmark</span><span class="meta">reference, not a threat</span></div>
+        <div class="kv">
+          <span class="k">Funding</span><span>€7M round (total ~$21.7M) — Novo Holdings &amp; EIFO re-up; new: Döhler Ventures, Collateral Good Ventures, Synergetic.</span>
+          <span class="k">Reg. path</span><span>Funds earmarked to complete EFSA &amp; FDA submissions for Natu.Red®.</span>
+          <span class="k">Readiness</span><span>CMO scale-up underway; 90+ manufacturer trials across EU/US (meat, confectionery, plant-based).</span>
+          <span class="k">Source</span><span class="src"><a href="https://www.prnewswire.com/news-releases/chromologics-raises-7-million-to-bring-its-natural-colour-ingredients-closer-to-market-302618235.html">PR Newswire</a> · <a href="https://novoholdings.dk/news/chromologics-raises-euro7-million-to-bring-its-natural-colour-ingredients-closer-to-market">Novo Holdings</a></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="hint">Rotating/lighter coverage next runs: BioColor ApS, PILI, Colorifix, Huue, Sparxell, Yemoja, San-Ei-Gen, DDW/Givaudan, ADM, IFF, Kerry, Symrise, dsm-firmenich, Döhler. No material in-window developments surfaced for these this period.</p>
+
+  <div class="foot"><span class="conf">Confidential — proprietary business information of Chromologics</span><span>Page 2 of 3</span></div>
+</section>
+
+<!-- ===================== PAGE 3 ===================== -->
+<section class="page">
+  <div class="mast">
+    <div class="logo"><img src="Chromologics-logo-raleway-.png" alt="Chromologics"></div>
+    <div class="doc"><div class="kicker">Monthly Competitor Intelligence</div><div class="period">June 2026</div><div class="sub">Page 3 · Market, regulatory &amp; IP</div></div>
+  </div>
+
+  <h1 class="page-title">Page 3 — Market, Regulatory &amp; IP Signals</h1>
+  <div class="legend" style="margin-bottom:6px;">
+    <span><span class="chip c-tail">Tailwind</span> favorable to Natu.Red®</span><span><span class="chip c-head">Headwind</span> unfavorable</span><span><span class="chip c-neu">Neutral/Mixed</span></span><span>+ trend: strengthening ↑ / steady → / weakening ↓</span>
+  </div>
+
+  <h2 class="sec">1 · Regulatory changes</h2>
+  <table>
+    <thead><tr><th style="width:20%">Storyline / region</th><th style="width:42%">Development</th><th style="width:15%" class="center">Direction</th><th style="width:9%" class="center">Conf.</th><th style="width:14%">Source</th></tr></thead>
+    <tbody>
+      <tr><td>us-dye-phaseout (US)</td><td>HHS/FDA targeting removal of six petroleum dyes (Green 3, Red 40, Yellow 5/6, Blue 1/2) by end-2026, plus Citrus Red 2 &amp; Orange B; Red 3 already revoked. Voluntary commitments — ~40% of the packaged supply pledged near-term removal.</td><td class="center"><span class="chip c-tail">Tailwind ↑</span></td><td class="center">Confirmed</td><td class="src"><a href="https://www.livenowfox.com/news/watch-live-rfk-jr-outline-steps-ban-more-food-dyes">LiveNOW Fox</a> · <a href="https://advocacy.consumerreports.org/press_release/one-year-after-rfk-called-for-phase-out-of-harmful-dyes-some-major-food-companies-havent-made-commitments-no-drug-companies-have-pledged-to-act/">Consumer Reports</a></td></tr>
+      <tr><td>fda-fast-track (US)</td><td>FDA signalling faster natural-color approvals — ~7 new approvals in the past year vs ~10 across the prior 15 years.</td><td class="center"><span class="chip c-tail">Tailwind ↑</span></td><td class="center">Likely</td><td class="src"><a href="https://www.foodnavigator-usa.com/Article/2026/03/23/fermentation-food-colors-gain-traction-as-synthetic-dye-phaseout-nears/">FoodNavigator-USA</a></td></tr>
+      <tr><td>fda-gm-color-hold (US)</td><td>FDA delayed effective dates for Phytolon's GM-yeast beetroot red and an expanded spirulina extract after objections (GMO/Toxin Free USA; Obelisk Tech) citing GM/precision-fermentation labeling and contaminant concerns.</td><td class="center"><span class="chip c-tail">Tailwind →</span></td><td class="center">Confirmed</td><td class="src"><a href="https://www.foodnavigator-usa.com/Article/2026/03/31/fda-pauses-beetroot-red-and-spirulina-color-approvals/">FoodNavigator-USA</a> · <a href="https://natlawreview.com/article/beetroot-red-and-spirulina-extract-effective-dates-delayed">Nat. Law Review</a></td></tr>
+      <tr><td>efsa-galdieria (EU)</td><td>EFSA issued a favourable opinion on Fermentalg's Galdieria Blue (Mar), opening EU marketing authorisation — signals EU receptivity to biotech/algae colors.</td><td class="center"><span class="chip c-neu">Neutral →</span></td><td class="center">Confirmed</td><td class="src"><a href="https://www.marketscreener.com/news/fermentalg-surges-after-favorable-opinion-on-its-natural-blue-colorant-in-europe-ce7e5edadc8cfe21">MarketScreener</a></td></tr>
+    </tbody>
+  </table>
+
+  <h2 class="sec">2 · Patents &amp; IP</h2>
+  <table>
+    <thead><tr><th style="width:18%">Entity</th><th style="width:14%" class="center">Type</th><th style="width:40%">Subject &amp; FTO note</th><th style="width:12%" class="center">Relevance</th><th style="width:16%">Source</th></tr></thead>
+    <tbody>
+      <tr><td>Phytolon</td><td class="center">Approval / rule</td><td>US final rule for betalain (beetroot red) biosynthesis in engineered <i>S. cerevisiae</i> — establishes a regulated GM-yeast betalain route; watch associated method claims for FTO on betalain reds.</td><td class="center"><span class="chip c-med">Med</span></td><td class="src"><a href="https://www.cirs-group.com/en/food/pathway-for-fda-approval-of-biosynthetic-food-colors-a-case-study-of-beetroot-red">CIRS Group</a></td></tr>
+      <tr><td>NextFerm</td><td class="center">Pending application</td><td>Novel yeast strain producing an astaxanthin carotenoid giving a pink hue — adjacent red/pink fermentation IP to monitor.</td><td class="center"><span class="chip c-lo">Low</span></td><td class="src"><a href="https://insights.figlobal.com/colours-flavours/food-colour-innovations-precision-fermentation-caramel-alternatives-and-natural-blues">FI Global Insights</a></td></tr>
+    </tbody>
+  </table>
+  <p class="hint">No new fermentation-red patent grant directly threatening Natu.Red® freedom-to-operate surfaced in-window. Recommend a dedicated patent-database pull (Espacenet/USPTO) next run for Phytolon, Michroma, Debut, Octarine.</p>
+
+  <div class="cols">
+    <div>
+      <h2 class="sec">3 · Synthetic-replacement signals</h2>
+      <div class="card" style="margin-top:2px;">Reformulation off Red 40 and other petroleum dyes is now a hard commercial driver, not a PR theme: ~40% of the US packaged-food supply has pledged near-term removal and Sensient expects a conversion ramp in H2 2026. Stable natural <i>reds</i> are the scarcest substitute — the exact gap Natu.Red® fills. <span class="chip c-tail">Tailwind ↑</span><br><span class="src"><a href="https://www.foodingredientsfirst.com/news/natural-color-innovation-regulation-2026.html">Food Ingredients First</a></span></div>
+      <h2 class="sec">4 · Natural-color market trends</h2>
+      <div class="card" style="margin-top:2px;">Carmine market ~$43.3M (2026); buyers are defaulting to carmine as the highest-stability, regulatory-safe natural red during reformulation despite persistent price volatility and its insect origin. Suppliers (GNT, Oterra, Sensient) are actively marketing carmine replacement — a live demand pool for a vegan, stable red. <span class="chip c-neu">Mixed →</span><br><span class="src"><a href="https://www.futuremarketinsights.com/reports/carmine-color-market">Future Market Insights</a> · <a href="https://exberry.com/en/color-insights/carmine-replacement/">GNT/Exberry</a> · <a href="https://na.sensientfoodcolors.com/research-development/carmine-the-new-red-3-and-red-40/">Sensient</a></span></div>
+    </div>
+    <div>
+      <h2 class="sec">5 · Customer / brand reformulation</h2>
+      <table>
+        <thead><tr><th style="width:34%">Segment</th><th style="width:42%">Activity</th><th style="width:24%" class="center">Direction</th></tr></thead>
+        <tbody>
+          <tr><td>US packaged food (broad)</td><td>~40% of supply pledged near-term synthetic-dye removal; momentum ahead of end-2026.</td><td class="center"><span class="chip c-tail">Tailwind ↑</span></td></tr>
+          <tr><td>Laggards / pharma</td><td>Consumer Reports: some major food cos and all drug cos had not committed one year on — adoption uneven.</td><td class="center"><span class="chip c-neu">Neutral →</span></td></tr>
+          <tr><td>Confectionery / clean-label</td><td>GNT pushing Exberry concepts at ISM 2026 &amp; new MEA application lab — colour-conversion support scaling.</td><td class="center"><span class="chip c-tail">Tailwind →</span></td></tr>
+        </tbody>
+      </table>
+      <p class="hint">Excluded per brief: general food news unrelated to color, generic sustainability PR, routine social posts, non-food pigment news without food technology-transfer.</p>
+    </div>
+  </div>
+
+  <h2 class="sec">Appendix · Snapshot &amp; method</h2>
+  <div class="card" style="font-size:8.6px;margin-top:2px;">
+    <b>Persistence:</b> No Airtable connected this run — persist this month's items as <code>intel/2026-06.json</code> (fields: Month · Entity · Category · Storyline_ID · Development · Impact · Threat · Confidence · Change_Status · Trajectory · Direction_for_CHR · Source · URL · Date_logged) so July can compute deltas. Storyline_IDs assigned this run: <i>phytolon-seriesB, debut-oterra-red40, michroma-cap-scaleup, sensient-prism-capex, fermentalg-galdieria-eu, octarine-seriesA, gnt-mea-lab, us-dye-phaseout, fda-fast-track, fda-gm-color-hold, efsa-galdieria, carmine-volatility, chromologics-reg-funding.</i><br>
+    <b>Confidence basis:</b> primary sources (company/FDA/EFSA/IR) first; trade press where primary unavailable. Items are paraphrased, not quoted; every item carries a source link. "Likely" = credible third-party reporting; "Confirmed" = primary source.
+  </div>
+
+  <div class="foot"><span class="conf">Confidential — proprietary business information of Chromologics</span><span>Page 3 of 3</span></div>
+</section>
+
+</body>
+</html>
