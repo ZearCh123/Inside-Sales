@@ -3,6 +3,7 @@ import { createAnthropic, INTEL_MODEL } from "@/lib/anthropic";
 import { tavilySearch, type TavilyResult } from "@/lib/tavily";
 import type {
   Competitor,
+  IntelConfig,
   IntelSnapshotPayload,
   Kpi,
   Storyline,
@@ -34,7 +35,7 @@ type ScanStoryline = {
   source_url: string;
 };
 
-type ScanResult = {
+export type ScanResult = {
   verdict: string;
   net_position: string;
   storylines: ScanStoryline[];
@@ -116,52 +117,58 @@ Din opgave: ud fra web-research-uddragene, syntetisér månedens competitor-, ma
 - immediate_keys = storyline_keys for de 2-4 mest hastende high-impact/nye trusler eller strategiske åbninger.
 - Vær konkret og beslutnings-orienteret. Undlad at opdigte; hvis research er tynd, så medtag færre storylines.`;
 
-/**
- * Runs a monthly intelligence scan for the given period: web-research via
- * Tavily, synthesis + classification + month-over-month delta via Claude, then
- * persists a new intel_run + storylines + competitors + snapshot.
- *
- * Uses the service-role client (intel writes require workspace-admin) and sets
- * workspace_id/owner explicitly.
- */
-export async function runIntelScan({
-  workspaceId,
-  periodMonth,
-  createdBy,
-}: ScanInput): Promise<{ runId: string; storylineCount: number }> {
-  const admin = createAdminClient();
+function buildSystemPrompt(config: IntelConfig): string {
+  return (
+    SYSTEM_PROMPT +
+    `\n\nFokus-konkurrenter: ${config.competitors.map((c) => c.name).join(", ")}.` +
+    `\nTarget-produkter at overvåge: ${config.target_products.join(", ")}.` +
+    `\nKategorier at dække: ${config.categories.join(", ")}.` +
+    (config.prompt_overrides
+      ? `\n\nWorkspace-specifikke instruktioner fra admin:\n${config.prompt_overrides}`
+      : "")
+  );
+}
 
-  // 0. Load this workspace's scan configuration (what to search for).
-  const { data: cfgRow } = await admin
+/** Loads a workspace's scan config (merged with defaults). */
+export async function loadIntelConfig(workspaceId: string): Promise<IntelConfig> {
+  const admin = createAdminClient();
+  const { data } = await admin
     .from("intel_config")
     .select("*")
     .eq("workspace_id", workspaceId)
     .maybeSingle();
-  const config = mergeIntelConfig(cfgRow);
-  const queries = buildScanQueries(config);
+  return mergeIntelConfig(data);
+}
 
-  // 1. Load the most recent prior snapshot for delta context.
-  const { data: priorSnap } = await admin
+/** Loads the most recent prior snapshot's storylines for delta context. */
+export async function loadPriorStorylines(
+  workspaceId: string,
+  periodMonth: string,
+): Promise<Storyline[]> {
+  const admin = createAdminClient();
+  const { data } = await admin
     .from("intel_snapshots")
-    .select("period_month, payload")
+    .select("payload")
     .eq("workspace_id", workspaceId)
     .lt("period_month", periodMonth)
     .order("period_month", { ascending: false })
     .limit(1)
     .maybeSingle();
+  return (data?.payload as IntelSnapshotPayload | undefined)?.storylines ?? [];
+}
 
-  const priorStorylines: Storyline[] =
-    (priorSnap?.payload as IntelSnapshotPayload | undefined)?.storylines ?? [];
-
-  // 2. Web research (queries derived from the workspace config). Run in parallel
-  //    to stay within the serverless time budget.
-  const research: TavilyResult[] = (
-    await Promise.all(queries.map((q) => tavilySearch(q)))
-  ).flat();
-
-  // 3. Synthesise with Claude (structured output + adaptive thinking, streamed
-  //    to avoid serverless timeouts).
+/** Calls Claude to synthesise research + prior storylines into a structured report. */
+export async function synthesizeScan(args: {
+  config: IntelConfig;
+  period: string;
+  priorStorylines: Storyline[];
+  research: TavilyResult[];
+  effort?: "low" | "medium" | "high";
+  maxTokens?: number;
+}): Promise<ScanResult> {
+  const { config, period, priorStorylines, research } = args;
   const anthropic = createAnthropic();
+
   const priorContext = priorStorylines.length
     ? priorStorylines
         .map((s) => `- ${s.storyline_key} [${s.change_status}/${s.impact}] ${s.headline}`)
@@ -172,25 +179,15 @@ export async function runIntelScan({
     .map((r, i) => `[${i + 1}] ${r.title}\n${r.url}\n${r.content}`)
     .join("\n\n");
 
-  const userMsg = `Periode: ${periodMonth}\n\nForrige måneds storylines (til delta):\n${priorContext}\n\nWeb-research-uddrag:\n${researchContext}`;
-
-  const systemPrompt =
-    SYSTEM_PROMPT +
-    `\n\nFokus-konkurrenter: ${config.competitors.map((c) => c.name).join(", ")}.` +
-    `\nTarget-produkter at overvåge: ${config.target_products.join(", ")}.` +
-    `\nKategorier at dække: ${config.categories.join(", ")}.` +
-    (config.prompt_overrides
-      ? `\n\nWorkspace-specifikke instruktioner fra admin:\n${config.prompt_overrides}`
-      : "");
+  const userMsg = `Periode: ${period}\n\nForrige måneds storylines (til delta):\n${priorContext}\n\nWeb-research-uddrag:\n${researchContext}`;
 
   const stream = anthropic.messages.stream({
     model: INTEL_MODEL,
-    max_tokens: 6000,
+    max_tokens: args.maxTokens ?? 6000,
     thinking: { type: "adaptive" },
-    system: systemPrompt,
-    // Low effort keeps the synthesis fast enough for the 60s budget.
+    system: buildSystemPrompt(config),
     output_config: {
-      effort: "low",
+      effort: args.effort ?? "low",
       format: { type: "json_schema", schema: RESULT_SCHEMA },
     },
     messages: [{ role: "user", content: userMsg }],
@@ -201,9 +198,19 @@ export async function runIntelScan({
   if (!textBlock || textBlock.type !== "text") {
     throw new Error("Scan-agenten returnerede intet svar.");
   }
-  const result = JSON.parse(textBlock.text) as ScanResult;
+  return JSON.parse(textBlock.text) as ScanResult;
+}
 
-  // 4. Map LLM output → DB rows ("none" → null).
+/** Persists a synthesised result as a new run + storylines + competitors + snapshot. */
+export async function persistScanResult(args: {
+  workspaceId: string;
+  period: string;
+  createdBy: string | null;
+  result: ScanResult;
+}): Promise<{ runId: string; storylineCount: number }> {
+  const { workspaceId, period, createdBy, result } = args;
+  const admin = createAdminClient();
+
   const storylines: Storyline[] = result.storylines.map((s) => ({
     storyline_key: s.storyline_key,
     entity: s.entity,
@@ -220,24 +227,20 @@ export async function runIntelScan({
     source_url: s.source_url,
   }));
 
-  // Derive competitors from competitor storylines.
   const competitorMap = new Map<string, Competitor>();
   for (const s of storylines) {
-    if (s.category !== "competitor") continue;
-    if (!competitorMap.has(s.entity)) {
-      competitorMap.set(s.entity, {
-        name: s.entity,
-        segment: null,
-        country: null,
-        relevance: s.threat ? `Trussel: ${s.threat}` : null,
-        threat_trajectory: s.trajectory,
-        notes: s.detail,
-      });
-    }
+    if (s.category !== "competitor" || competitorMap.has(s.entity)) continue;
+    competitorMap.set(s.entity, {
+      name: s.entity,
+      segment: null,
+      country: null,
+      relevance: s.threat ? `Trussel: ${s.threat}` : null,
+      threat_trajectory: s.trajectory,
+      notes: s.detail,
+    });
   }
   const competitors = Array.from(competitorMap.values());
 
-  // 5. Build KPIs (same derivation as the seed) + snapshot payload.
   const counts = deriveKpiCounts(storylines);
   const tailwindLabel =
     storylines.find((s) => s.direction === "tailwind" && s.impact === "high")
@@ -275,7 +278,7 @@ export async function runIntelScan({
   ];
 
   const snapshot: IntelSnapshotPayload = {
-    period: periodMonth,
+    period,
     verdict: result.verdict,
     net_position: result.net_position,
     kpis,
@@ -284,23 +287,22 @@ export async function runIntelScan({
     competitors,
   };
 
-  // 6. Persist: replace any existing run/snapshot for this period, then write.
   await admin
     .from("intel_runs")
     .delete()
     .eq("workspace_id", workspaceId)
-    .eq("period_month", periodMonth);
+    .eq("period_month", period);
   await admin
     .from("intel_snapshots")
     .delete()
     .eq("workspace_id", workspaceId)
-    .eq("period_month", periodMonth);
+    .eq("period_month", period);
 
   const { data: run, error: runErr } = await admin
     .from("intel_runs")
     .insert({
       workspace_id: workspaceId,
-      period_month: periodMonth,
+      period_month: period,
       status: "complete",
       net_position: result.net_position,
       summary: result.verdict,
@@ -339,11 +341,36 @@ export async function runIntelScan({
 
   await admin.from("intel_snapshots").insert({
     workspace_id: workspaceId,
-    period_month: periodMonth,
+    period_month: period,
     payload: snapshot,
   });
 
   return { runId: run.id, storylineCount: storylines.length };
+}
+
+/**
+ * Synchronous monthly scan (used by the cron path). Light: parallel basic
+ * searches + low-effort synthesis, sized to fit the serverless time budget.
+ * The manual UI uses the deeper, stepwise background job (see scan-job.ts).
+ */
+export async function runIntelScan({
+  workspaceId,
+  periodMonth,
+  createdBy,
+}: ScanInput): Promise<{ runId: string; storylineCount: number }> {
+  const config = await loadIntelConfig(workspaceId);
+  const priorStorylines = await loadPriorStorylines(workspaceId, periodMonth);
+  const queries = buildScanQueries(config);
+  const research = (
+    await Promise.all(queries.map((q) => tavilySearch(q)))
+  ).flat();
+  const result = await synthesizeScan({
+    config,
+    period: periodMonth,
+    priorStorylines,
+    research,
+  });
+  return persistScanResult({ workspaceId, period: periodMonth, createdBy, result });
 }
 
 /** Returns the first day of the month after the given YYYY-MM-DD date. */
