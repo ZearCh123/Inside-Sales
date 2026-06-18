@@ -26,7 +26,7 @@ export default async function MonthlyPrintPage({
 
       <header className="mb-6 border-b border-[#E7D7D2] pb-4">
         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#C8362C]">
-          Chromologics · Monthly assessment
+          {view.companyName} · Monthly assessment
         </p>
         <h1 className="mt-1 font-display text-2xl font-bold">
           Competitor &amp; Regulatory Radar — {periodLabel(view.period)}
@@ -91,7 +91,7 @@ export default async function MonthlyPrintPage({
       </section>
 
       <footer className="mt-8 border-t border-[#E7D7D2] pt-3 text-[11px] text-[#6B5D5A]">
-        Genereret af Chromologics Sales Intelligence Platform.
+        Genereret af {view.companyName} · Sales Intelligence Platform.
       </footer>
     </div>
   );

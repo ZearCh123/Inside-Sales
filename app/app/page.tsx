@@ -26,11 +26,11 @@ export default async function OverviewPage() {
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Du er logget ind som {user?.email}, men er endnu ikke knyttet til et
-            workspace. Opret Chromologics-workspacet for at komme i gang.
+            workspace. Opret dit workspace for at komme i gang.
           </p>
           <form action={createWorkspace} className="mt-6">
             <Button type="submit" className="w-full">
-              Opret Chromologics workspace
+              Opret workspace
             </Button>
           </form>
         </div>

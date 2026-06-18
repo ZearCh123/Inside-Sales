@@ -11,6 +11,7 @@ import { deriveKpiCounts } from "./format";
 
 export type MonthlyView = {
   workspaceId: string;
+  companyName: string;
   runs: RunOption[];
   period: string;
   verdict: string;
@@ -52,11 +53,14 @@ export async function getMonthlyView(
 
   const { data: membership } = await supabase
     .from("workspace_members")
-    .select("workspace_id")
+    .select("workspace_id, workspaces(name)")
     .limit(1)
     .maybeSingle();
   if (!membership) return null;
   const workspaceId = membership.workspace_id as string;
+  const companyName =
+    (membership.workspaces as { name?: string } | null)?.name ??
+    "Sales Intelligence";
 
   const { data: runRows } = await supabase
     .from("intel_runs")
@@ -125,6 +129,7 @@ export async function getMonthlyView(
 
   return {
     workspaceId,
+    companyName,
     runs,
     period,
     verdict: payload?.verdict ?? run?.summary ?? "—",

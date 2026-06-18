@@ -19,7 +19,7 @@ export function Legend() {
           </ul>
         </div>
         <div>
-          <p className="mb-1.5 font-semibold text-[#1B1418]">Retning for Chromologics</p>
+          <p className="mb-1.5 font-semibold text-[#1B1418]">Retning</p>
           <p className="mb-1.5">
             Er udviklingen god eller dårlig for jer? Pilen viser trenden (↑ stigende,
             → stabil, ↓ aftagende).
@@ -42,7 +42,7 @@ export function Legend() {
           </div>
           <p>
             I <b>trussels-dossiererne</b> viser ↑ Stigende / → Stabil / ↓ Aftagende,
-            om en konkurrent rykker tættere på at konkurrere med Natu.Red®.
+            om en konkurrent rykker tættere på at konkurrere med jeres produkt.
           </p>
         </div>
       </div>

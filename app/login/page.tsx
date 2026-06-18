@@ -23,10 +23,10 @@ export default function LoginPage() {
       <div className="w-full max-w-sm rounded-2xl bg-card p-8 shadow-xl">
         <div className="mb-6 text-center">
           <p className="font-display text-2xl font-bold tracking-tight text-brand-crimson">
-            Chromologics
+            Sales Intelligence
           </p>
           <h1 className="mt-1 text-sm text-muted-foreground">
-            Sales Intelligence Platform
+            Log ind på din konto
           </h1>
         </div>
 

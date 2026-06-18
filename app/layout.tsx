@@ -9,9 +9,8 @@ const display = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Chromologics Sales Intelligence",
-  description:
-    "Intern sales-intelligence-platform for Chromologics (Natu.Red®).",
+  title: "Sales Intelligence",
+  description: "Multi-tenant sales-intelligence-platform.",
 };
 
 export default function RootLayout({

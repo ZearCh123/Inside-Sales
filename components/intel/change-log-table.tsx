@@ -29,7 +29,7 @@ export function ChangeLogTable({
         <table className="w-full text-left">
           <thead>
             <tr className="border-b-2 border-[#E7D7D2]">
-              {["Storyline", "Entitet", "Ændring", "Impact", "Retning for Chromologics"].map(
+              {["Storyline", "Entitet", "Ændring", "Impact", "Retning"].map(
                 (h) => (
                   <th
                     key={h}

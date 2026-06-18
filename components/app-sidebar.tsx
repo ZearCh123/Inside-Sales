@@ -7,14 +7,20 @@ import { cn } from "@/lib/utils";
 import { signOut } from "@/app/app/actions";
 import { LogOut } from "lucide-react";
 
-export function AppSidebar({ email }: { email: string }) {
+export function AppSidebar({
+  email,
+  workspaceName,
+}: {
+  email: string;
+  workspaceName: string;
+}) {
   const pathname = usePathname();
 
   return (
     <aside className="flex w-64 shrink-0 flex-col border-r border-border bg-brand-ink text-brand-paper">
       <div className="px-6 py-5">
         <p className="font-display text-lg font-bold tracking-tight text-brand-paper">
-          Chromologics
+          {workspaceName}
         </p>
         <p className="text-xs text-brand-paper/50">Sales Intelligence</p>
       </div>
