@@ -12,16 +12,17 @@ export type TavilyResult = {
  */
 export async function tavilySearch(
   query: string,
-  maxResults = 5,
+  maxResults = 4,
 ): Promise<TavilyResult[]> {
   try {
     const res = await fetch("https://api.tavily.com/search", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      // "basic" depth keeps each search fast enough to fit the scan time budget.
       body: JSON.stringify({
         api_key: process.env.TAVILY_API_KEY,
         query,
-        search_depth: "advanced",
+        search_depth: "basic",
         max_results: maxResults,
         include_answer: false,
       }),

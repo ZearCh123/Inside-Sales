@@ -153,11 +153,11 @@ export async function runIntelScan({
   const priorStorylines: Storyline[] =
     (priorSnap?.payload as IntelSnapshotPayload | undefined)?.storylines ?? [];
 
-  // 2. Web research (queries derived from the workspace config).
-  const research: TavilyResult[] = [];
-  for (const q of queries) {
-    research.push(...(await tavilySearch(q)));
-  }
+  // 2. Web research (queries derived from the workspace config). Run in parallel
+  //    to stay within the serverless time budget.
+  const research: TavilyResult[] = (
+    await Promise.all(queries.map((q) => tavilySearch(q)))
+  ).flat();
 
   // 3. Synthesise with Claude (structured output + adaptive thinking, streamed
   //    to avoid serverless timeouts).
@@ -185,11 +185,12 @@ export async function runIntelScan({
 
   const stream = anthropic.messages.stream({
     model: INTEL_MODEL,
-    max_tokens: 8000,
+    max_tokens: 6000,
     thinking: { type: "adaptive" },
     system: systemPrompt,
+    // Low effort keeps the synthesis fast enough for the 60s budget.
     output_config: {
-      effort: "medium",
+      effort: "low",
       format: { type: "json_schema", schema: RESULT_SCHEMA },
     },
     messages: [{ role: "user", content: userMsg }],

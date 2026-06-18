@@ -14,9 +14,20 @@ export function ScanButton() {
     setError(null);
     try {
       const res = await fetch("/api/intel-scan", { method: "POST" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Scan fejlede");
-      router.push(`/app/monthly?period=${data.period}`);
+      const text = await res.text();
+      let data: { period?: string; error?: string } | null = null;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        // Non-JSON response — almost always a platform timeout (504) or crash.
+        throw new Error(
+          res.status === 504 || res.status === 502
+            ? "Scannet tog for lang tid (timeout). Prøv igen, eller opgradér Vercel-planen for længere kørsel."
+            : `Scan fejlede (status ${res.status}).`,
+        );
+      }
+      if (!res.ok) throw new Error(data?.error ?? "Scan fejlede");
+      router.push(`/app/monthly?period=${data?.period ?? ""}`);
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Scan fejlede");
