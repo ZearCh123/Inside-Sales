@@ -11,11 +11,11 @@ import { deriveKpiCounts } from "./format";
 
 // Priority competitor + market/regulatory queries, derived from the master
 // prompt (docs/intel/Chromologics_Monthly_Intelligence_Cowork_Prompt.md).
+// Kept to 4 queries so the whole scan (research + synthesis) fits within the
+// serverless time budget (60s on Vercel Hobby).
 const SCAN_QUERIES = [
-  "Phytolon fermentation natural red food color funding news",
-  "Michroma fungal red food color FDA petition news",
+  "Phytolon Michroma fermentation natural red food color funding 2026",
   "Debut Biotechnology Oterra Red 40 alternative fermentation",
-  "Oterra natural color news launch partnership",
   "FDA synthetic dye phase-out Red 40 Red 3 reformulation 2026",
   "natural red food color carmine replacement fermentation market 2026",
 ];
@@ -177,10 +177,13 @@ export async function runIntelScan({
 
   const stream = anthropic.messages.stream({
     model: INTEL_MODEL,
-    max_tokens: 16000,
+    max_tokens: 8000,
     thinking: { type: "adaptive" },
     system: SYSTEM_PROMPT,
-    output_config: { format: { type: "json_schema", schema: RESULT_SCHEMA } },
+    output_config: {
+      effort: "medium",
+      format: { type: "json_schema", schema: RESULT_SCHEMA },
+    },
     messages: [{ role: "user", content: userMsg }],
   } as Parameters<typeof anthropic.messages.stream>[0]);
 

@@ -3,8 +3,9 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { runIntelScan, nextMonthPeriod } from "@/lib/intel/scan";
 
-// The scan calls Tavily + Claude and may run for a while.
-export const maxDuration = 300;
+// The scan calls Tavily + Claude. 60s is the Vercel Hobby-plan ceiling; raise to
+// 300 on a Pro plan if scans need longer.
+export const maxDuration = 60;
 
 function firstOfThisMonth(): string {
   const d = new Date();
