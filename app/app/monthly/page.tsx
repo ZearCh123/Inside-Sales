@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Settings } from "lucide-react";
+import { Settings, Table2 } from "lucide-react";
 import { getMonthlyView } from "@/lib/intel/queries";
 import { seedJuneData } from "./actions";
 import { Button } from "@/components/ui/button";
@@ -63,6 +63,11 @@ export default async function MonthlyPage({
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <MonthSelector runs={view.runs} current={view.period} />
+          <Button asChild variant="outline">
+            <Link href="/app/monthly/findings">
+              <Table2 className="size-4" /> Findings-tracker
+            </Link>
+          </Button>
           <Button asChild variant="outline">
             <Link href="/app/settings/intelligence">
               <Settings className="size-4" /> Indstillinger
