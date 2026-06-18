@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type {
   Competitor,
+  CompetitorView,
   IntelSnapshotPayload,
   Kpi,
   RunOption,
@@ -16,9 +17,28 @@ export type MonthlyView = {
   netPosition: string;
   kpis: Kpi[];
   storylines: Storyline[];
-  competitors: Competitor[];
+  competitors: CompetitorView[];
   immediateKeys: string[];
 };
+
+/** Attaches each competitor's source by matching its name to a storyline entity. */
+function withSources(
+  competitors: Competitor[],
+  storylines: Storyline[],
+): CompetitorView[] {
+  return competitors.map((c) => {
+    const match = storylines.find(
+      (s) =>
+        s.entity.toLowerCase().includes(c.name.toLowerCase()) ||
+        c.name.toLowerCase().includes(s.entity.toLowerCase()),
+    );
+    return {
+      ...c,
+      source_name: match?.source_name ?? null,
+      source_url: match?.source_url ?? null,
+    };
+  });
+}
 
 /**
  * Loads the Monthly assessment view for the logged-in user's workspace and the
@@ -111,7 +131,7 @@ export async function getMonthlyView(
     netPosition: payload?.net_position ?? run?.net_position ?? "",
     kpis,
     storylines,
-    competitors,
+    competitors: withSources(competitors, storylines),
     immediateKeys: payload?.immediate_keys ?? [],
   };
 }

@@ -42,6 +42,23 @@ export type Competitor = {
   notes: string | null;
 };
 
+/** A competitor enriched with the source of its matching storyline (for the UI). */
+export type CompetitorView = Competitor & {
+  source_name: string | null;
+  source_url: string | null;
+};
+
+/** Per-workspace scan configuration (row in intel_config). */
+export type IntelConfig = {
+  competitors: { name: string; segment?: string; country?: string; priority?: string }[];
+  priority_set: string[];
+  categories: string[];
+  target_products: string[];
+  regions: string[];
+  sources: string[];
+  prompt_overrides: string | null;
+};
+
 export type KpiTone = "tail" | "head" | "med" | "neutral";
 
 /** A single KPI card, precomputed at seed/scan time and stored in the snapshot. */

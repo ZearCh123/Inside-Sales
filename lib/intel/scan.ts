@@ -8,17 +8,7 @@ import type {
   Storyline,
 } from "./types";
 import { deriveKpiCounts } from "./format";
-
-// Priority competitor + market/regulatory queries, derived from the master
-// prompt (docs/intel/Chromologics_Monthly_Intelligence_Cowork_Prompt.md).
-// Kept to 4 queries so the whole scan (research + synthesis) fits within the
-// serverless time budget (60s on Vercel Hobby).
-const SCAN_QUERIES = [
-  "Phytolon Michroma fermentation natural red food color funding 2026",
-  "Debut Biotechnology Oterra Red 40 alternative fermentation",
-  "FDA synthetic dye phase-out Red 40 Red 3 reformulation 2026",
-  "natural red food color carmine replacement fermentation market 2026",
-];
+import { buildScanQueries, mergeIntelConfig } from "./config";
 
 type ScanInput = {
   workspaceId: string;
@@ -141,6 +131,15 @@ export async function runIntelScan({
 }: ScanInput): Promise<{ runId: string; storylineCount: number }> {
   const admin = createAdminClient();
 
+  // 0. Load this workspace's scan configuration (what to search for).
+  const { data: cfgRow } = await admin
+    .from("intel_config")
+    .select("*")
+    .eq("workspace_id", workspaceId)
+    .maybeSingle();
+  const config = mergeIntelConfig(cfgRow);
+  const queries = buildScanQueries(config);
+
   // 1. Load the most recent prior snapshot for delta context.
   const { data: priorSnap } = await admin
     .from("intel_snapshots")
@@ -154,9 +153,9 @@ export async function runIntelScan({
   const priorStorylines: Storyline[] =
     (priorSnap?.payload as IntelSnapshotPayload | undefined)?.storylines ?? [];
 
-  // 2. Web research.
+  // 2. Web research (queries derived from the workspace config).
   const research: TavilyResult[] = [];
-  for (const q of SCAN_QUERIES) {
+  for (const q of queries) {
     research.push(...(await tavilySearch(q)));
   }
 
@@ -175,11 +174,20 @@ export async function runIntelScan({
 
   const userMsg = `Periode: ${periodMonth}\n\nForrige måneds storylines (til delta):\n${priorContext}\n\nWeb-research-uddrag:\n${researchContext}`;
 
+  const systemPrompt =
+    SYSTEM_PROMPT +
+    `\n\nFokus-konkurrenter: ${config.competitors.map((c) => c.name).join(", ")}.` +
+    `\nTarget-produkter at overvåge: ${config.target_products.join(", ")}.` +
+    `\nKategorier at dække: ${config.categories.join(", ")}.` +
+    (config.prompt_overrides
+      ? `\n\nWorkspace-specifikke instruktioner fra admin:\n${config.prompt_overrides}`
+      : "");
+
   const stream = anthropic.messages.stream({
     model: INTEL_MODEL,
     max_tokens: 8000,
     thinking: { type: "adaptive" },
-    system: SYSTEM_PROMPT,
+    system: systemPrompt,
     output_config: {
       effort: "medium",
       format: { type: "json_schema", schema: RESULT_SCHEMA },

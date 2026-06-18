@@ -25,6 +25,16 @@ export function ImmediateAttention({
             </span>
             <span className="text-[#1B1418]">
               <b>{s.entity}:</b> {s.detail}
+              {s.source_url && (
+                <a
+                  href={s.source_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ml-1 whitespace-nowrap text-[12px] font-medium text-[#C8362C] hover:underline"
+                >
+                  ↗ {s.source_name ?? "kilde"}
+                </a>
+              )}
             </span>
           </li>
         ))}

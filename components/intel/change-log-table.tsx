@@ -29,7 +29,7 @@ export function ChangeLogTable({
         <table className="w-full text-left">
           <thead>
             <tr className="border-b-2 border-[#E7D7D2]">
-              {["Storyline", "Entitet", "Ændring", "Impact", "Retning for CHR"].map(
+              {["Storyline", "Entitet", "Ændring", "Impact", "Retning for Chromologics"].map(
                 (h) => (
                   <th
                     key={h}
@@ -53,6 +53,16 @@ export function ChangeLogTable({
                 >
                   <td className="px-2 py-3 text-sm font-medium text-[#1B1418]">
                     {s.headline}
+                    {s.source_url && (
+                      <a
+                        href={s.source_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-0.5 block text-[11px] font-normal text-[#C8362C] hover:underline"
+                      >
+                        ↗ {s.source_name ?? "Kilde"}
+                      </a>
+                    )}
                   </td>
                   <td className="px-2 py-3 text-sm text-[#6B5D5A]">
                     {s.entity}

@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { Settings } from "lucide-react";
 import { getMonthlyView } from "@/lib/intel/queries";
 import { seedJuneData } from "./actions";
 import { Button } from "@/components/ui/button";
@@ -9,6 +11,7 @@ import { ThreatDossiers } from "@/components/intel/threat-dossiers";
 import { MonthSelector } from "@/components/intel/month-selector";
 import { ScanButton } from "@/components/intel/scan-button";
 import { ExportPdfButton } from "@/components/intel/export-pdf-button";
+import { Legend } from "@/components/intel/legend";
 
 export default async function MonthlyPage({
   searchParams,
@@ -59,6 +62,11 @@ export default async function MonthlyPage({
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <MonthSelector runs={view.runs} current={view.period} />
+          <Button asChild variant="outline">
+            <Link href="/app/settings/intelligence">
+              <Settings className="size-4" /> Indstillinger
+            </Link>
+          </Button>
           <ExportPdfButton period={view.period} />
           <ScanButton />
         </div>
@@ -77,6 +85,10 @@ export default async function MonthlyPage({
           <NetPosition verdict={view.verdict} text={view.netPosition} />
           <ThreatDossiers competitors={view.competitors} />
         </div>
+      </div>
+
+      <div className="mt-5">
+        <Legend />
       </div>
     </div>
   );

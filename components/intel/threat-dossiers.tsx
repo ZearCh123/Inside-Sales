@@ -1,4 +1,4 @@
-import type { Competitor } from "@/lib/intel/types";
+import type { CompetitorView } from "@/lib/intel/types";
 import { CHIP, trajectoryChip } from "@/lib/intel/format";
 import { Chip } from "./chips";
 
@@ -11,7 +11,7 @@ const TRAJECTORY_RANK: Record<string, number> = {
 export function ThreatDossiers({
   competitors,
 }: {
-  competitors: Competitor[];
+  competitors: CompetitorView[];
 }) {
   const ordered = [...competitors].sort(
     (a, b) =>
@@ -56,6 +56,16 @@ export function ThreatDossiers({
               </div>
               {c.notes && (
                 <p className="mt-1.5 text-[12.5px] text-[#6B5D5A]">{c.notes}</p>
+              )}
+              {c.source_url && (
+                <a
+                  href={c.source_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-1 inline-block text-[11px] font-medium text-[#C8362C] hover:underline"
+                >
+                  ↗ {c.source_name ?? "Kilde"}
+                </a>
               )}
             </div>
           );
