@@ -7,6 +7,7 @@ import {
   synthesizeScan,
   type ScanResult,
 } from "./scan";
+import { buildDeepQueries } from "./config";
 import type { IntelConfig } from "./types";
 
 type Task =
@@ -33,36 +34,6 @@ export type StepResult = {
   period: string;
   error?: string;
 };
-
-/**
- * Builds a broad query set for a deep scan: one search per competitor plus
- * market/regulatory/IP sweeps. Each becomes its own step (its own request), so
- * there is no per-request time limit on how much we research.
- */
-function buildDeepQueries(config: IntelConfig): string[] {
-  const products = config.target_products.slice(0, 4).join(" ");
-  const regions = config.regions.join(" ");
-  const queries = config.competitors.map(
-    (c) =>
-      `${c.name} ${products} fermentation natural color funding partnership launch FDA news 2026`,
-  );
-  if (config.categories.includes("market")) {
-    queries.push(
-      `natural color market ${products} replacement fermentation ${regions} 2026 trends pricing`,
-    );
-  }
-  if (config.categories.includes("regulatory")) {
-    queries.push(
-      `FDA EFSA ${products} phase-out reformulation approval regulatory 2026`,
-    );
-  }
-  if (config.categories.includes("ip")) {
-    queries.push(
-      `${products} natural color fermentation patent filing IP 2026`,
-    );
-  }
-  return queries;
-}
 
 function labelFor(payload: JobPayload): string {
   const total = payload.tasks.length;
@@ -159,7 +130,12 @@ export async function runScanStep(
 
   try {
     if (task.kind === "search") {
-      const results = await tavilySearch(task.query, 5, "advanced");
+      const results = await tavilySearch(
+        task.query,
+        5,
+        "advanced",
+        payload.config.sources,
+      );
       payload.research.push(...results);
     } else if (task.kind === "synthesize") {
       const prior = await loadPriorStorylines(workspaceId, payload.period);

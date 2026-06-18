@@ -42,6 +42,31 @@ export default async function MonthlyPrintPage({
         </p>
       </section>
 
+      {(view.recommendedActions.length > 0 ||
+        view.risks.length > 0 ||
+        view.opportunities.length > 0) && (
+        <section className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3 break-inside-avoid">
+          {[
+            { t: "Anbefalede handlinger", items: view.recommendedActions },
+            { t: "Risici", items: view.risks },
+            { t: "Muligheder", items: view.opportunities },
+          ].map((col) =>
+            col.items.length ? (
+              <div key={col.t}>
+                <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-[#6B5D5A]">
+                  {col.t}
+                </p>
+                <ul className="list-disc space-y-1 pl-4 text-[12.5px] text-[#3a302e]">
+                  {col.items.map((it, i) => (
+                    <li key={i}>{it}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null,
+          )}
+        </section>
+      )}
+
       <section className="mb-6">
         <h2 className="mb-2 font-display text-base font-semibold">
           In-window change log

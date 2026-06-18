@@ -40,6 +40,9 @@ export type ScanResult = {
   net_position: string;
   storylines: ScanStoryline[];
   immediate_keys: string[];
+  risks: string[];
+  opportunities: string[];
+  recommended_actions: string[];
 };
 
 const RESULT_SCHEMA = {
@@ -49,6 +52,9 @@ const RESULT_SCHEMA = {
     verdict: { type: "string", enum: ["Styrket", "Holdt", "Eroderet"] },
     net_position: { type: "string" },
     immediate_keys: { type: "array", items: { type: "string" } },
+    risks: { type: "array", items: { type: "string" } },
+    opportunities: { type: "array", items: { type: "string" } },
+    recommended_actions: { type: "array", items: { type: "string" } },
     storylines: {
       type: "array",
       items: {
@@ -102,20 +108,36 @@ const RESULT_SCHEMA = {
       },
     },
   },
-  required: ["verdict", "net_position", "immediate_keys", "storylines"],
+  required: [
+    "verdict",
+    "net_position",
+    "immediate_keys",
+    "risks",
+    "opportunities",
+    "recommended_actions",
+    "storylines",
+  ],
 } as const;
 
-const SYSTEM_PROMPT = `Du er en månedlig market-intelligence-analytiker for en virksomhed. Virksomheden overvåger sine konkurrenter og vil erstatte/udkonkurrere bestemte target-produkter (angives nedenfor).
+const SYSTEM_PROMPT = `Du er en månedlig market-intelligence-analytiker for en virksomhed, der overvåger sine konkurrenter og vil erstatte/udkonkurrere bestemte target-produkter (angives nedenfor).
 
-Din opgave: ud fra web-research-uddragene, syntetisér månedens competitor-, market- og regulatory-intelligence til strukturerede storylines. Følg disse regler:
+Dæk disse fire emner systematisk ud fra web-research-uddragene:
+1. COMPANY UPDATES (konkurrenter): funding-runder, nye investorer, ledelses-skift, hiring, nye kontorer/produktionssites, partnerskaber, M&A.
+2. PRODUCT & TECHNOLOGY: nye farve-lanceringer, nye pigment-platforme, claims (varme-/pH-stabilitet, vegansk, naturlighed, bæredygtighed, skalerbarhed), target-applikationer (mejeri, konfekture, drikkevarer, kød, plantebaseret, kosmetik, tekstil).
+3. REGULATORY & IP: FDA/EFSA/EU/UK/LATAM/APAC farve-regulering, Red 3/Red 40-udvikling, restriktioner på syntetiske farver, godkendelser/indsigelser for fermenterede farver, patent-ansøgninger/grants/assignments/licensering, COSMOS-certificering.
+4. MARKET SIGNALS: brand-reformuleringer væk fra syntetiske farver, retailer-bans/clean-label-politikker, kunde-efterspørgsel (vegansk/halal/kosher/carmine-fri/insekt-fri), pris- og supply-signaler (carmine, betanin, anthocyaniner, syntetiske røde).
 
-- Klassificér hver storyline: impact (high/medium/low), threat mod virksomheden (high/medium/low, eller "none" for ikke-konkurrent), confidence (confirmed/likely/unverified), direction for virksomheden (tailwind/headwind/neutral/mixed), trajectory for konkurrenter (rising/stable/receding, ellers "none").
-- Giv hver storyline en STABIL storyline_key (kebab-case, fx "phytolon-seriesB"). Genbrug nøgler fra forrige måneds snapshot når det er samme historie.
-- Sæt change_status ud fra forrige snapshot: nøgle fandtes før → escalating/ongoing/cooling; ny nøgle → new; tidligere nøgle uden opdatering og afsluttet → resolved.
-- headline = kort dansk label (3-6 ord). detail = 1-2 danske sætninger, paraphrased (citér aldrig). Angiv altid source_name + source_url.
-- verdict = ét ord (Styrket/Holdt/Eroderet). net_position = ét dansk afsnit: styrkede, holdt eller eroderede virksomhedens position denne måned, og hvorfor.
-- immediate_keys = storyline_keys for de 2-4 mest hastende high-impact/nye trusler eller strategiske åbninger.
-- Vær konkret og beslutnings-orienteret. Undlad at opdigte; hvis research er tynd, så medtag færre storylines.`;
+Syntetisér til strukturerede storylines. Regler:
+- Klassificér hver storyline: category (competitor/market/regulatory/ip), impact (high/medium/low), threat mod virksomheden (high/medium/low, eller "none" for ikke-konkurrent), confidence (confirmed/likely/unverified), direction for virksomheden (tailwind/headwind/neutral/mixed), trajectory for konkurrenter (rising/stable/receding, ellers "none").
+- STABIL storyline_key (kebab-case). Genbrug nøgler fra forrige snapshot ved samme historie; sæt change_status ud fra forrige snapshot (fandtes før → escalating/ongoing/cooling; ny → new; afsluttet → resolved).
+- headline = kort dansk label (3-6 ord). detail = 1-2 paraphrasede danske sætninger (citér aldrig). Angiv ALTID source_name + source_url — prioritér troværdige, sporbare kilder.
+
+Producér også executive summary (3-siders rapport):
+- net_position = ét dansk afsnit: styrkede/holdt/eroderede virksomhedens position, og hvorfor. verdict = ét ord (Styrket/Holdt/Eroderet).
+- risks = 2-4 vigtigste risici. opportunities = 2-4 vigtigste muligheder. recommended_actions = 2-4 konkrete, handlingsorienterede anbefalinger.
+- immediate_keys = storyline_keys for de 2-4 mest hastende high-impact-trusler/åbninger.
+
+Vær konkret og beslutnings-orienteret (læseren er CEO/commercial lead). Undlad at opdigte; hvis research er tynd for et emne, så sig det og medtag færre storylines.`;
 
 function buildSystemPrompt(config: IntelConfig): string {
   return (
@@ -285,6 +307,9 @@ export async function persistScanResult(args: {
     immediate_keys: result.immediate_keys,
     storylines,
     competitors,
+    risks: result.risks,
+    opportunities: result.opportunities,
+    recommended_actions: result.recommended_actions,
   };
 
   await admin
@@ -362,7 +387,9 @@ export async function runIntelScan({
   const priorStorylines = await loadPriorStorylines(workspaceId, periodMonth);
   const queries = buildScanQueries(config);
   const research = (
-    await Promise.all(queries.map((q) => tavilySearch(q)))
+    await Promise.all(
+      queries.map((q) => tavilySearch(q, 4, "basic", config.sources)),
+    )
   ).flat();
   const result = await synthesizeScan({
     config,

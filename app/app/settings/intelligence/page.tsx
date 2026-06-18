@@ -101,7 +101,14 @@ export default async function IntelSettingsPage({
         </div>
 
         <fieldset className="space-y-2">
-          <legend className="text-sm font-medium text-foreground">Kategorier</legend>
+          <legend className="text-sm font-medium text-foreground">Emner der scannes</legend>
+          <p className="text-xs text-muted-foreground">
+            Konkurrenter dækker company-updates (funding, ledelse, partnerskaber,
+            M&amp;A) + produkt/teknologi (lanceringer, claims, applikationer). Marked
+            dækker reformulering, retailer-policies, efterspørgsel og pris/supply.
+            Regulatorisk dækker FDA/EFSA/EU/UK m.fl., Red 3/Red 40 og godkendelser.
+            IP dækker patenter og licensering.
+          </p>
           <div className="flex flex-wrap gap-4">
             {CATEGORIES.map((c) => (
               <label key={c.id} className="flex items-center gap-2 text-sm">
@@ -141,6 +148,23 @@ export default async function IntelSettingsPage({
             id="regions"
             name="regions"
             defaultValue={config.regions.join(", ")}
+            className={inputCls}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-foreground" htmlFor="sources">
+            Foretrukne kilder (domæner)
+          </label>
+          <p className="text-xs text-muted-foreground">
+            Søgningen begrænses til disse troværdige domæner. Én pr. linje (fx{" "}
+            <code>fda.gov</code>, <code>foodnavigator.com</code>). Tom = søg overalt.
+          </p>
+          <textarea
+            id="sources"
+            name="sources"
+            rows={6}
+            defaultValue={config.sources.join("\n")}
             className={inputCls}
           />
         </div>

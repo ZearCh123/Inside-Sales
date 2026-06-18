@@ -14,6 +14,7 @@ export async function tavilySearch(
   query: string,
   maxResults = 4,
   depth: "basic" | "advanced" = "basic",
+  includeDomains?: string[],
 ): Promise<TavilyResult[]> {
   try {
     const res = await fetch("https://api.tavily.com/search", {
@@ -21,12 +22,16 @@ export async function tavilySearch(
       headers: { "Content-Type": "application/json" },
       // "basic" keeps the synchronous scan fast; the background job uses
       // "advanced" per step (each step is its own request, so depth is free).
+      // include_domains restricts results to the workspace's preferred sources.
       body: JSON.stringify({
         api_key: process.env.TAVILY_API_KEY,
         query,
         search_depth: depth,
         max_results: maxResults,
         include_answer: false,
+        ...(includeDomains && includeDomains.length
+          ? { include_domains: includeDomains }
+          : {}),
       }),
     });
     if (!res.ok) return [];

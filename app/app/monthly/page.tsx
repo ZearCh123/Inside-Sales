@@ -11,6 +11,7 @@ import { ThreatDossiers } from "@/components/intel/threat-dossiers";
 import { MonthSelector } from "@/components/intel/month-selector";
 import { ScanButton } from "@/components/intel/scan-button";
 import { ExportPdfButton } from "@/components/intel/export-pdf-button";
+import { ExecSummary } from "@/components/intel/exec-summary";
 import { Legend } from "@/components/intel/legend";
 
 export default async function MonthlyPage({
@@ -75,6 +76,18 @@ export default async function MonthlyPage({
       <div className="mb-6">
         <KpiCards kpis={view.kpis} />
       </div>
+
+      {(view.recommendedActions.length > 0 ||
+        view.risks.length > 0 ||
+        view.opportunities.length > 0) && (
+        <div className="mb-5">
+          <ExecSummary
+            risks={view.risks}
+            opportunities={view.opportunities}
+            recommendedActions={view.recommendedActions}
+          />
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.35fr_1fr]">
         <div className="space-y-5">

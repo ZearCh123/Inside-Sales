@@ -83,4 +83,8 @@ export type IntelSnapshotPayload = {
   immediate_keys: string[];
   storylines: Storyline[];
   competitors: Competitor[];
+  /** Executive-summary fields (page 1 of the report). */
+  risks?: string[];
+  opportunities?: string[];
+  recommended_actions?: string[];
 };

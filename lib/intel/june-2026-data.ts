@@ -363,6 +363,25 @@ export const JUNE_2026_IMMEDIATE_KEYS = [
   "fda-gm-color-hold",
 ];
 
+export const JUNE_2026_RISKS = [
+  "Phytolon og Debut+Oterra kapløb mod US-skala — risiko for at en rival-fermenteret rød når markedet først.",
+  "Sensients $250M-kapacitet lægger pris- og skalapres på naturlige røde.",
+  "Vinduet til at konvertere regulatorisk fremgang til first-mover-fordel snævrer ind.",
+];
+
+export const JUNE_2026_OPPORTUNITIES = [
+  "USA's udfasning af seks petroleum-farver skaber hård reformulerings-efterspørgsel på stabile naturlige røde.",
+  "FDA's hold på GM-gær rødbede-rød skærper fordelen ved en non-GMO platform.",
+  "Levende carmine-erstatnings-pulje (vegansk/halal/kosher, insekt-fri).",
+];
+
+export const JUNE_2026_ACTIONS = [
+  "Accelerér og kommunikér EFSA/FDA-submission-milepæle.",
+  "Skærp non-GMO-budskabet i lyset af FDA's hold på GM-farver.",
+  "Prioritér carmine-erstatnings-konti (vegansk/halal/kosher, insekt-fri).",
+  "Re-engagér Döhler (nu investor via Döhler Ventures) som route-to-market.",
+];
+
 export const JUNE_2026_SNAPSHOT: IntelSnapshotPayload = {
   period: JUNE_2026_PERIOD,
   verdict: JUNE_2026_VERDICT,
@@ -371,4 +390,7 @@ export const JUNE_2026_SNAPSHOT: IntelSnapshotPayload = {
   immediate_keys: JUNE_2026_IMMEDIATE_KEYS,
   storylines: JUNE_2026_STORYLINES,
   competitors: JUNE_2026_COMPETITORS,
+  risks: JUNE_2026_RISKS,
+  opportunities: JUNE_2026_OPPORTUNITIES,
+  recommended_actions: JUNE_2026_ACTIONS,
 };

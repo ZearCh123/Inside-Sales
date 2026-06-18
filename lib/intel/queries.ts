@@ -20,6 +20,9 @@ export type MonthlyView = {
   storylines: Storyline[];
   competitors: CompetitorView[];
   immediateKeys: string[];
+  risks: string[];
+  opportunities: string[];
+  recommendedActions: string[];
 };
 
 /** Attaches each competitor's source by matching its name to a storyline entity. */
@@ -138,5 +141,8 @@ export async function getMonthlyView(
     storylines,
     competitors: withSources(competitors, storylines),
     immediateKeys: payload?.immediate_keys ?? [],
+    risks: payload?.risks ?? [],
+    opportunities: payload?.opportunities ?? [],
+    recommendedActions: payload?.recommended_actions ?? [],
   };
 }

@@ -61,6 +61,7 @@ export async function saveIntelConfig(formData: FormData) {
       categories: categories.length ? categories : ["competitor", "market", "regulatory", "ip"],
       target_products: splitList(String(formData.get("target_products") ?? "")),
       regions: splitList(String(formData.get("regions") ?? "")),
+      sources: splitList(String(formData.get("sources") ?? "")),
       prompt_overrides: promptOverrides || null,
     },
     { onConflict: "workspace_id" },
