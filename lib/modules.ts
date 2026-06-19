@@ -1,37 +1,72 @@
 import {
-  LayoutDashboard,
-  LineChart,
+  FileText,
+  Crosshair,
+  Scale,
+  Table2,
   Radar,
-  KanbanSquare,
-  Headphones,
+  PhoneCall,
   GraduationCap,
+  LayoutDashboard,
+  Database,
+  Upload,
+  Home,
+  KanbanSquare,
   Inbox,
   Calendar,
   Send,
   type LucideIcon,
 } from "lucide-react";
 
-export type AppModule = {
-  /** Route segment under /app */
+export type NavItem = {
   href: string;
   label: string;
   icon: LucideIcon;
-  /** Roadmap phase that builds this module (for context) */
-  phase: number;
+  /** Render with an accent colour (a different type of market intelligence). */
+  accent?: boolean;
 };
 
-/**
- * The 9 modules shown in the left navigation. Order matches docs/00_START_HER.md.
- * Only Overview (the index) is built so far — the rest are placeholders.
- */
-export const MODULES: AppModule[] = [
-  { href: "/app", label: "Overview", icon: LayoutDashboard, phase: 2 },
-  { href: "/app/monthly", label: "Monthly assessment", icon: LineChart, phase: 1 },
-  { href: "/app/radar", label: "Leads Radar", icon: Radar, phase: 4 },
-  { href: "/app/projects", label: "Projects", icon: KanbanSquare, phase: 2 },
-  { href: "/app/agent", label: "Sales Agent", icon: Headphones, phase: 3 },
-  { href: "/app/coach", label: "Sales Coach", icon: GraduationCap, phase: 3 },
-  { href: "/app/inbox", label: "Inbox", icon: Inbox, phase: 5 },
-  { href: "/app/calendar", label: "Calendar", icon: Calendar, phase: 5 },
-  { href: "/app/outreach", label: "Outreach flows", icon: Send, phase: 4 },
+export type NavGroup = {
+  title: string;
+  items: NavItem[];
+};
+
+/** Grouped left navigation. */
+export const NAV_GROUPS: NavGroup[] = [
+  {
+    title: "Market Intelligence",
+    items: [
+      { href: "/app/market", label: "Executive summary", icon: FileText },
+      { href: "/app/market/competitor", label: "Competitor", icon: Crosshair },
+      {
+        href: "/app/market/regulatory",
+        label: "Market trends & regulatory",
+        icon: Scale,
+      },
+      { href: "/app/market/findings", label: "Findings tracker", icon: Table2 },
+      { href: "/app/radar", label: "Leads Radar", icon: Radar, accent: true },
+    ],
+  },
+  {
+    title: "Customer Calling",
+    items: [
+      { href: "/app/agent", label: "Live call agent", icon: PhoneCall },
+      { href: "/app/coach", label: "Sales Coach", icon: GraduationCap },
+      { href: "/app/dashboard", label: "My dashboard", icon: LayoutDashboard },
+      { href: "/app/rag", label: "RAG Database", icon: Database },
+      { href: "/app/rag-ingestion", label: "RAG Ingestion", icon: Upload },
+    ],
+  },
+  {
+    title: "Other",
+    items: [
+      { href: "/app", label: "Overview", icon: Home },
+      { href: "/app/projects", label: "Projects", icon: KanbanSquare },
+      { href: "/app/inbox", label: "Inbox", icon: Inbox },
+      { href: "/app/calendar", label: "Calendar", icon: Calendar },
+      { href: "/app/outreach", label: "Outreach flows", icon: Send },
+    ],
+  },
 ];
+
+/** Flat list of all nav hrefs + labels (used for finding the active item). */
+export const ALL_NAV_ITEMS: NavItem[] = NAV_GROUPS.flatMap((g) => g.items);

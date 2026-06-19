@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { seedJuneIntel } from "@/lib/intel/seed-june";
 
-/** Seeds the June 2026 Monthly assessment for the current user's workspace. */
+/** Seeds the June 2026 report for the current user's workspace. */
 export async function seedJuneData() {
   const supabase = await createClient();
   const {
@@ -21,5 +21,5 @@ export async function seedJuneData() {
   if (!membership) redirect("/app");
 
   await seedJuneIntel(membership.workspace_id as string, user.id);
-  revalidatePath("/app/monthly");
+  revalidatePath("/app/market");
 }

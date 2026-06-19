@@ -43,10 +43,10 @@ export default async function IntelSettingsPage({
   return (
     <div className="mx-auto max-w-2xl p-8">
       <Link
-        href="/app/monthly"
+        href="/app/market"
         className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
-        <ArrowLeft className="size-4" /> Tilbage til Monthly assessment
+        <ArrowLeft className="size-4" /> Tilbage til Market Intelligence
       </Link>
 
       <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">

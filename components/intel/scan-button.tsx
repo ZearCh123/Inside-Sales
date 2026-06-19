@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 type StepResult = {
@@ -16,6 +16,7 @@ type StepResult = {
 
 export function ScanButton() {
   const router = useRouter();
+  const pathname = usePathname();
   const [running, setRunning] = useState(false);
   const [progress, setProgress] = useState<{ label: string; pct: number } | null>(
     null,
@@ -69,7 +70,7 @@ export function ScanButton() {
           throw new Error(step.error ?? "Scan fejlede");
         }
         if (step.done) {
-          router.push(`/app/monthly?period=${step.period}`);
+          router.push(`${pathname}?period=${step.period}`);
           router.refresh();
           return;
         }

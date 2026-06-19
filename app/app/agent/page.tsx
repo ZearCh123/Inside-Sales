@@ -1,6 +1,12 @@
 import { ModulePlaceholder } from "@/components/module-placeholder";
-import { Headphones } from "lucide-react";
+import { PhoneCall } from "lucide-react";
 
 export default function Page() {
-  return <ModulePlaceholder title="Sales Agent" icon={Headphones} phase={3} />;
+  return (
+    <ModulePlaceholder
+      title="Live call agent"
+      icon={PhoneCall}
+      subtitle="Live call coach med RAG — bygges senere."
+    />
+  );
 }

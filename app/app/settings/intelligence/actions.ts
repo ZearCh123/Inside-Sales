@@ -45,7 +45,7 @@ export async function saveIntelConfig(formData: FormData) {
     .in("role", ["owner", "admin"])
     .limit(1)
     .maybeSingle();
-  if (!membership) redirect("/app/monthly");
+  if (!membership) redirect("/app/market");
 
   const competitors = parseCompetitors(
     String(formData.get("competitors") ?? ""),

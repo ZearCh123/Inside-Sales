@@ -1,7 +1,8 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { createWorkspace } from "./actions";
 import { Button } from "@/components/ui/button";
-import { MODULES } from "@/lib/modules";
+import { LineChart, PhoneCall } from "lucide-react";
 
 export default async function OverviewPage() {
   const supabase = await createClient();
@@ -12,7 +13,7 @@ export default async function OverviewPage() {
   // Does the user belong to any workspace yet?
   const { data: memberships } = await supabase
     .from("workspace_members")
-    .select("workspace_id, role, workspaces(name)")
+    .select("workspace_id, role")
     .limit(1);
 
   const membership = memberships?.[0];
@@ -38,6 +39,21 @@ export default async function OverviewPage() {
     );
   }
 
+  const quick = [
+    {
+      href: "/app/market",
+      label: "Market Intelligence",
+      desc: "Executive summary, competitor, market & regulatory, findings tracker, leads radar.",
+      icon: LineChart,
+    },
+    {
+      href: "/app/agent",
+      label: "Customer Calling",
+      desc: "Live call agent, sales coach, dashboard og RAG.",
+      icon: PhoneCall,
+    },
+  ];
+
   return (
     <div className="p-8">
       <header className="mb-8">
@@ -49,28 +65,23 @@ export default async function OverviewPage() {
         </p>
       </header>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {MODULES.filter((m) => m.href !== "/app").map((m) => {
-          const Icon = m.icon;
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {quick.map((q) => {
+          const Icon = q.icon;
           return (
-            <div
-              key={m.href}
-              className="rounded-2xl border border-border bg-card p-5"
+            <Link
+              key={q.href}
+              href={q.href}
+              className="rounded-2xl border border-border bg-card p-5 transition-colors hover:border-brand-crimson/40"
             >
               <div className="flex items-center gap-3">
                 <span className="flex size-9 items-center justify-center rounded-lg bg-secondary text-brand-crimson">
                   <Icon className="size-4" />
                 </span>
-                <div>
-                  <p className="text-sm font-medium text-foreground">
-                    {m.label}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Fase {m.phase}
-                  </p>
-                </div>
+                <p className="text-sm font-medium text-foreground">{q.label}</p>
               </div>
-            </div>
+              <p className="mt-2 text-sm text-muted-foreground">{q.desc}</p>
+            </Link>
           );
         })}
       </div>
