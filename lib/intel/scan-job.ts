@@ -1,17 +1,18 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { tavilySearch, type TavilyResult } from "@/lib/tavily";
 import {
-  loadIntelConfig,
   loadPriorStorylines,
   persistScanResult,
   synthesizeScan,
   type ScanResult,
 } from "./scan";
-import { buildDeepQueries } from "./config";
+import { buildDeepQueries, loadIntelConfig, allDomains } from "./config";
+import { fetchFeed } from "./feeds";
 import type { IntelConfig } from "./types";
 
 type Task =
   | { kind: "search"; query: string }
+  | { kind: "feed"; url: string; name: string }
   | { kind: "synthesize" }
   | { kind: "persist" };
 
@@ -36,11 +37,14 @@ export type StepResult = {
 };
 
 function labelFor(payload: JobPayload): string {
-  const total = payload.tasks.length;
+  const research = payload.tasks.filter(
+    (t) => t.kind === "search" || t.kind === "feed",
+  ).length;
   const task = payload.tasks[payload.cursor];
   if (!task) return "Færdig";
   if (task.kind === "search")
-    return `Søger på nettet (${payload.cursor + 1}/${total - 2})…`;
+    return `Søger på nettet (${payload.cursor + 1}/${research})…`;
+  if (task.kind === "feed") return `Henter feed: ${task.name}…`;
   if (task.kind === "synthesize") return "Syntetiserer rapport…";
   return "Gemmer rapport…";
 }
@@ -55,6 +59,7 @@ export async function startScanJob(
   const config = await loadIntelConfig(workspaceId);
   const tasks: Task[] = [
     ...buildDeepQueries(config).map((query) => ({ kind: "search" as const, query })),
+    ...config.feeds.map((f) => ({ kind: "feed" as const, url: f.url, name: f.name })),
     { kind: "synthesize" as const },
     { kind: "persist" as const },
   ];
@@ -126,7 +131,6 @@ export async function runScanStep(
   }
 
   const task = payload.tasks[payload.cursor];
-  const label = labelFor(payload);
 
   try {
     if (task.kind === "search") {
@@ -134,9 +138,11 @@ export async function runScanStep(
         task.query,
         5,
         "advanced",
-        payload.config.sources,
+        allDomains(payload.config),
       );
       payload.research.push(...results);
+    } else if (task.kind === "feed") {
+      payload.research.push(...(await fetchFeed(task.url)));
     } else if (task.kind === "synthesize") {
       const prior = await loadPriorStorylines(workspaceId, payload.period);
       payload.result = await synthesizeScan({

@@ -33,39 +33,61 @@ export default async function MarketPrintPage({
         </h1>
       </header>
 
-      <section className="mb-6">
-        <h2 className="mb-1 font-display text-lg font-semibold">
-          Net position: {view.verdict}
-        </h2>
-        <p className="text-sm leading-relaxed text-[#3a302e]">
-          {view.netPosition}
-        </p>
-      </section>
-
-      {(view.recommendedActions.length > 0 ||
-        view.risks.length > 0 ||
-        view.opportunities.length > 0) && (
-        <section className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3 break-inside-avoid">
-          {[
-            { t: "Anbefalede handlinger", items: view.recommendedActions },
-            { t: "Risici", items: view.risks },
-            { t: "Muligheder", items: view.opportunities },
-          ].map((col) =>
-            col.items.length ? (
-              <div key={col.t}>
-                <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-[#6B5D5A]">
-                  {col.t}
-                </p>
-                <ul className="list-disc space-y-1 pl-4 text-[12.5px] text-[#3a302e]">
-                  {col.items.map((it, i) => (
+      {/* Executive-summary blocks in the workspace's configured order. */}
+      {view.displaySections
+        .filter((s) => s.visible && s.id !== "kpis")
+        .map((s) => {
+          const bullets = (title: string, items: string[]) =>
+            items.length ? (
+              <section key={s.id} className="mb-5 break-inside-avoid">
+                <h2 className="mb-1 font-display text-base font-semibold">{title}</h2>
+                <ul className="list-disc space-y-1 pl-5 text-[12.5px] text-[#3a302e]">
+                  {items.map((it, i) => (
                     <li key={i}>{it}</li>
                   ))}
                 </ul>
-              </div>
-            ) : null,
-          )}
-        </section>
-      )}
+              </section>
+            ) : null;
+          if (s.id === "net_position")
+            return (
+              <section key={s.id} className="mb-5 break-inside-avoid">
+                <h2 className="mb-1 font-display text-lg font-semibold">
+                  Net position: {view.verdict}
+                </h2>
+                <p className="text-sm leading-relaxed text-[#3a302e]">
+                  {view.netPosition}
+                </p>
+              </section>
+            );
+          if (s.id === "actions")
+            return bullets("Anbefalede handlinger", view.recommendedActions);
+          if (s.id === "risks") return bullets("Risici", view.risks);
+          if (s.id === "opportunities")
+            return bullets("Muligheder", view.opportunities);
+          if (s.id === "immediate")
+            return bullets(
+              "Immediate attention",
+              view.storylines
+                .filter((x) => view.immediateKeys.includes(x.storyline_key))
+                .map((x) => `${x.entity}: ${x.detail}`),
+            );
+          if (s.title || s.body)
+            return (
+              <section key={s.id} className="mb-5 break-inside-avoid">
+                {s.title && (
+                  <h2 className="mb-1 font-display text-base font-semibold">
+                    {s.title}
+                  </h2>
+                )}
+                {s.body && (
+                  <p className="whitespace-pre-wrap text-[12.5px] text-[#3a302e]">
+                    {s.body}
+                  </p>
+                )}
+              </section>
+            );
+          return null;
+        })}
 
       <section className="mb-6">
         <h2 className="mb-2 font-display text-base font-semibold">

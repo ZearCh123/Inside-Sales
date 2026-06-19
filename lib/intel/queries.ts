@@ -2,12 +2,14 @@ import { createClient } from "@/lib/supabase/server";
 import type {
   Competitor,
   CompetitorView,
+  DisplaySection,
   IntelSnapshotPayload,
   Kpi,
   RunOption,
   Storyline,
 } from "./types";
 import { deriveKpiCounts } from "./format";
+import { loadIntelConfig, DEFAULT_DISPLAY_SECTIONS } from "./config";
 
 export type MonthlyView = {
   workspaceId: string;
@@ -23,6 +25,8 @@ export type MonthlyView = {
   risks: string[];
   opportunities: string[];
   recommendedActions: string[];
+  /** Configurable executive-summary layout (order + visibility). */
+  displaySections: DisplaySection[];
 };
 
 /** Attaches each competitor's source by matching its name to a storyline entity. */
@@ -61,9 +65,14 @@ export async function getMonthlyView(
     .maybeSingle();
   if (!membership) return null;
   const workspaceId = membership.workspace_id as string;
+  const config = await loadIntelConfig(workspaceId);
   const companyName =
-    (membership.workspaces as { name?: string } | null)?.name ??
+    config.company_profile.company_name ||
+    (membership.workspaces as { name?: string } | null)?.name ||
     "Sales Intelligence";
+  const displaySections = config.display.sections.length
+    ? config.display.sections
+    : DEFAULT_DISPLAY_SECTIONS;
 
   const { data: runRows } = await supabase
     .from("intel_runs")
@@ -144,5 +153,6 @@ export async function getMonthlyView(
     risks: payload?.risks ?? [],
     opportunities: payload?.opportunities ?? [],
     recommendedActions: payload?.recommended_actions ?? [],
+    displaySections,
   };
 }

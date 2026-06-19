@@ -48,15 +48,74 @@ export type CompetitorView = Competitor & {
   source_url: string | null;
 };
 
-/** Per-workspace scan configuration (row in intel_config). */
+// ---------- White-label Market Intelligence configuration ----------
+// Stored per-workspace as JSON under workspaces.settings.intel. Every field is
+// customer-defined so the whole module can be sold white-label.
+
+/** Strategic frame — the analysis is rendered from THIS company's viewpoint. */
+export type CompanyProfile = {
+  company_name: string;
+  product_names: string[];
+  value_proposition: string;
+  differentiators: string[];
+  target_products: string[]; // what they monitor / want to replace
+  icp: string; // ideal customer profile
+  pains: string[];
+  gains: string[];
+  threats: string[];
+  barriers: string[];
+};
+
+export type CompetitorConfig = {
+  name: string;
+  segment?: string;
+  country?: string;
+  priority?: string;
+  website?: string;
+  notes?: string;
+};
+
+export type TopicConfig = {
+  id: string;
+  label: string;
+  enabled: boolean;
+  keywords: string[];
+};
+
+export type SourceGroups = {
+  key_sources: string[];
+  regulatory_bodies: string[];
+  industry_news: string[];
+};
+
+export type FeedConfig = { url: string; name: string; category: string };
+
+export type ScheduleConfig = {
+  cadence: "weekly" | "biweekly" | "monthly";
+  day: number;
+};
+
+/** One configurable section of the executive summary report. */
+export type DisplaySection = {
+  id: string; // kpis | net_position | risks | opportunities | actions | immediate | custom:<n>
+  visible: boolean;
+  title?: string; // custom blocks
+  body?: string; // custom blocks
+};
+
+export type DisplayConfig = { sections: DisplaySection[] };
+
 export type IntelConfig = {
-  competitors: { name: string; segment?: string; country?: string; priority?: string }[];
+  company_profile: CompanyProfile;
+  competitors: CompetitorConfig[];
   priority_set: string[];
-  categories: string[];
-  target_products: string[];
+  topics: TopicConfig[];
+  source_groups: SourceGroups;
+  feeds: FeedConfig[];
   regions: string[];
-  sources: string[];
-  prompt_overrides: string | null;
+  schedule: ScheduleConfig;
+  display: DisplayConfig;
+  analysis: { extra_instructions: string };
 };
 
 export type KpiTone = "tail" | "head" | "med" | "neutral";

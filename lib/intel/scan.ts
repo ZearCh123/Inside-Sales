@@ -9,7 +9,7 @@ import type {
   Storyline,
 } from "./types";
 import { deriveKpiCounts } from "./format";
-import { buildScanQueries, mergeIntelConfig } from "./config";
+import { buildScanQueries, loadIntelConfig, allDomains } from "./config";
 
 type ScanInput = {
   workspaceId: string;
@@ -139,27 +139,34 @@ Producér også executive summary (3-siders rapport):
 
 Vær konkret og beslutnings-orienteret (læseren er CEO/commercial lead). Undlad at opdigte; hvis research er tynd for et emne, så sig det og medtag færre storylines.`;
 
+/** Builds the analyst system prompt framed entirely around the workspace's company profile. */
 function buildSystemPrompt(config: IntelConfig): string {
+  const p = config.company_profile;
+  const list = (label: string, items: string[]) =>
+    items.length ? `\n- ${label}: ${items.join("; ")}.` : "";
+  const topics = config.topics
+    .filter((t) => t.enabled)
+    .map((t) => `${t.label} (${t.keywords.slice(0, 8).join(", ")})`)
+    .join("\n- ");
+
   return (
+    `Du er market-intelligence-analytiker for ${p.company_name}.` +
+    `\nVirksomheden: ${p.value_proposition}` +
+    list("Produkter", p.product_names) +
+    list("Differentiatorer", p.differentiators) +
+    list("Target-produkter de overvåger/vil erstatte", p.target_products) +
+    (p.icp ? `\n- ICP: ${p.icp}.` : "") +
+    list("Gains (det de vinder på)", p.gains) +
+    list("Pains (det der gør ondt)", p.pains) +
+    list("Threats (trusler)", p.threats) +
+    list("Barriers (barrierer)", p.barriers) +
+    `\n\nDæk disse emner systematisk ud fra web-research-uddragene:\n- ${topics}\n\n` +
     SYSTEM_PROMPT +
-    `\n\nFokus-konkurrenter: ${config.competitors.map((c) => c.name).join(", ")}.` +
-    `\nTarget-produkter at overvåge: ${config.target_products.join(", ")}.` +
-    `\nKategorier at dække: ${config.categories.join(", ")}.` +
-    (config.prompt_overrides
-      ? `\n\nWorkspace-specifikke instruktioner fra admin:\n${config.prompt_overrides}`
+    `\n\nVURDÉR ALT FRA ${p.company_name.toUpperCase()}'S SYNSVINKEL: direction = medvind (godt for ${p.company_name}) / modvind (skidt) ud fra deres gains/pains/threats/barriers. verdict, net_position, risks, opportunities og recommended_actions skal rammes ind om netop ${p.company_name}'s situation — ikke en generisk vurdering.` +
+    (config.analysis.extra_instructions
+      ? `\n\nWorkspace-specifikke instruktioner fra admin:\n${config.analysis.extra_instructions}`
       : "")
   );
-}
-
-/** Loads a workspace's scan config (merged with defaults). */
-export async function loadIntelConfig(workspaceId: string): Promise<IntelConfig> {
-  const admin = createAdminClient();
-  const { data } = await admin
-    .from("intel_config")
-    .select("*")
-    .eq("workspace_id", workspaceId)
-    .maybeSingle();
-  return mergeIntelConfig(data);
 }
 
 /** Loads the most recent prior snapshot's storylines for delta context. */
@@ -386,10 +393,9 @@ export async function runIntelScan({
   const config = await loadIntelConfig(workspaceId);
   const priorStorylines = await loadPriorStorylines(workspaceId, periodMonth);
   const queries = buildScanQueries(config);
+  const domains = allDomains(config);
   const research = (
-    await Promise.all(
-      queries.map((q) => tavilySearch(q, 4, "basic", config.sources)),
-    )
+    await Promise.all(queries.map((q) => tavilySearch(q, 4, "basic", domains)))
   ).flat();
   const result = await synthesizeScan({
     config,
