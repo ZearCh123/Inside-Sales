@@ -14,7 +14,7 @@ import type {
 
 export const DEFAULT_COMPANY_PROFILE: CompanyProfile = {
   company_name: "Chromologics",
-  product_names: ["Natu.Red®"],
+  product_names: ["Natu.Red®", "Sustainly.Red®"],
   value_proposition:
     "Fermenteret, naturlig rød fødevarefarve der erstatter carmine, Red 3 og Red 40 — non-GMO, stabil og vegansk.",
   differentiators: ["non-GMO", "varme-/pH-stabil", "vegansk", "fermenteret"],

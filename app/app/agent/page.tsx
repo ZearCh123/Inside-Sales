@@ -1,12 +1,5 @@
-import { ModulePlaceholder } from "@/components/module-placeholder";
-import { PhoneCall } from "lucide-react";
+import { LiveCallClient } from "@/components/agent/live-call-client";
 
-export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="Live call agent"
-      icon={PhoneCall}
-      subtitle="Live call coach med RAG — bygges senere."
-    />
-  );
+export default function LiveCallAgentPage() {
+  return <LiveCallClient />;
 }
