@@ -1,8 +1,8 @@
 import type { CompanyProfile } from "@/lib/intel/types";
 
-export type Tier = "fast" | "medium" | "deep" | "thorough";
+export type Tier = "fast" | "medium" | "deep";
 
-/** Model + reasoning per cadence tier (faster/cheaper → slower/deeper). */
+/** Model + reasoning per horizon box (10s reactive → 1min+ considered). */
 export const TIER_CONFIG: Record<
   Tier,
   { model: string; effort?: "low" | "medium" | "high"; thinking?: boolean; maxTokens: number }
@@ -11,7 +11,6 @@ export const TIER_CONFIG: Record<
   fast: { model: "claude-haiku-4-5", maxTokens: 900 },
   medium: { model: "claude-sonnet-4-6", effort: "low", maxTokens: 1200 },
   deep: { model: "claude-sonnet-4-6", effort: "high", thinking: true, maxTokens: 1800 },
-  thorough: { model: "claude-opus-4-8", effort: "high", thinking: true, maxTokens: 2600 },
 };
 
 const CARD_SCHEMA = {
@@ -62,12 +61,13 @@ FOOD SCIENTIST (food_scientist[]): Du er PhD food scientist-specialist i ${p.com
 - Giv produkt-anbefalinger med konkrete, plausible value points for ${products} (opfind realistiske tekniske fordele — fx pH-/varme-stabilitet, vegansk, non-GMO — indtil en rigtig vidensbase er koblet på).
 
 COMMERCIAL COACH (commercial[]): Du er en top sales coach (BANT, Miller Heiman, MEDDIC, SPIN).
-- Påpeg objections og hvordan de håndteres, købssignaler kunden lige gav, og hvor sælgeren bør stille uddybende spørgsmål.
+- Ved en OBJECTION: giv en konkret håndtering i body — fx "Anerkend → omfram → stil et spørgsmål", med en sætning sælgeren faktisk kan sige.
+- Påpeg også købssignaler kunden gav, og hvor sælgeren bør grave dybere.
 
 REGLER:
-- Returnér KUN høj-værdi kort. Hvis der intet relevant er i dette uddrag, returnér TOMME lister (food_scientist: [], commercial: []) — så skærmen forbliver ren.
-- Max 3 kort pr. side. title = kort (≤6 ord). body = 1-2 konkrete danske sætninger. kind ∈ question|recommendation|objection|signal|tip.
-- Vær hurtig og handlingsorienteret — sælgeren læser dette midt i en samtale.`;
+- Returnér KUN høj-værdi kort. Hvis der intet nyt og relevant er i dette uddrag, returnér TOMME lister.
+- HØJST 2 kort pr. side — vælg det vigtigste. title = kort (≤6 ord). body = 1-2 konkrete danske sætninger sælgeren kan handle på MED DET SAMME. kind ∈ question|recommendation|objection|signal|tip.
+- Sælgeren læser dette midt i en samtale — vær skarp og konkret, ikke generisk.`;
 }
 
 /** System prompt for the end-of-call summary. */

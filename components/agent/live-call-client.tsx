@@ -1,20 +1,31 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Mic, Square, Sparkles } from "lucide-react";
+import { Mic, Square, Sparkles, Eye, EyeOff, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { connectRealtime, type RealtimeConnection } from "@/lib/agent/realtime";
-import { CoachPane, type CoachCard } from "./coach-pane";
+import { HorizonBox, type CoachCard, type CoachDebug } from "./coach-pane";
 import { Transcript } from "./transcript";
 
-type Tier = "fast" | "medium" | "deep" | "thorough";
-const TIERS: { tier: Tier; everyMs: number; windowSec: number }[] = [
-  { tier: "fast", everyMs: 8000, windowSec: 9 },
-  { tier: "medium", everyMs: 25000, windowSec: 30 },
-  { tier: "deep", everyMs: 60000, windowSec: 60 },
-  { tier: "thorough", everyMs: 300000, windowSec: 300 },
+type Tier = "fast" | "medium" | "deep";
+const TIERS: {
+  tier: Tier;
+  label: string;
+  sublabel: string;
+  everyMs: number;
+  windowSec: number;
+}[] = [
+  { tier: "fast", label: "Lige nu", sublabel: "seneste ~10 sek", everyMs: 10000, windowSec: 14 },
+  { tier: "medium", label: "Kontekst", sublabel: "seneste ~30 sek", everyMs: 30000, windowSec: 35 },
+  { tier: "deep", label: "Strategi", sublabel: "seneste 1 min+", everyMs: 60000, windowSec: 120 },
 ];
 
+type BoxState = {
+  food: CoachCard[];
+  commercial: CoachCard[];
+  updatedAt: number | null;
+  debug: CoachDebug | null;
+};
 type Segment = { text: string; t: number };
 type Summary = {
   headline: string;
@@ -23,24 +34,8 @@ type Summary = {
   action_points: string[];
 };
 
-const emptyByTier = (): Record<Tier, CoachCard[]> => ({
-  fast: [],
-  medium: [],
-  deep: [],
-  thorough: [],
-});
-
-function dedup(cards: CoachCard[]): CoachCard[] {
-  const seen = new Set<string>();
-  const out: CoachCard[] = [];
-  for (const c of cards) {
-    if (!seen.has(c.title)) {
-      seen.add(c.title);
-      out.push(c);
-    }
-  }
-  return out;
-}
+const emptyBox = (): BoxState => ({ food: [], commercial: [], updatedAt: null, debug: null });
+const emptyBoxes = (): Record<Tier, BoxState> => ({ fast: emptyBox(), medium: emptyBox(), deep: emptyBox() });
 
 export function LiveCallClient() {
   const [recording, setRecording] = useState(false);
@@ -48,10 +43,11 @@ export function LiveCallClient() {
   const [error, setError] = useState<string | null>(null);
   const [segments, setSegments] = useState<Segment[]>([]);
   const [partial, setPartial] = useState("");
-  const [foodByTier, setFoodByTier] = useState(emptyByTier());
-  const [commByTier, setCommByTier] = useState(emptyByTier());
+  const [boxes, setBoxes] = useState(emptyBoxes());
   const [summary, setSummary] = useState<Summary | null>(null);
   const [summarizing, setSummarizing] = useState(false);
+  const [transcriptOpen, setTranscriptOpen] = useState(true);
+  const [showDebug, setShowDebug] = useState(false);
 
   const connRef = useRef<RealtimeConnection | null>(null);
   const micRef = useRef<MediaStream | null>(null);
@@ -90,9 +86,19 @@ export function LiveCallClient() {
       const data = (await res.json()) as {
         food_scientist?: CoachCard[];
         commercial?: CoachCard[];
+        debug?: CoachDebug;
       };
-      setFoodByTier((p) => ({ ...p, [tier]: data.food_scientist ?? [] }));
-      setCommByTier((p) => ({ ...p, [tier]: data.commercial ?? [] }));
+      const food = data.food_scientist ?? [];
+      const commercial = data.commercial ?? [];
+      setBoxes((prev) => {
+        const hasNew = food.length > 0 || commercial.length > 0;
+        return {
+          ...prev,
+          [tier]: hasNew
+            ? { food, commercial, updatedAt: Date.now(), debug: data.debug ?? null }
+            : { ...prev[tier], debug: data.debug ?? prev[tier].debug },
+        };
+      });
     } catch {
       /* a missed coach tick is harmless */
     }
@@ -100,8 +106,7 @@ export function LiveCallClient() {
 
   const onTranscript = useCallback((text: string, isFinal: boolean) => {
     if (isFinal) {
-      const seg = { text, t: Date.now() };
-      segmentsRef.current = [...segmentsRef.current, seg];
+      segmentsRef.current = [...segmentsRef.current, { text, t: Date.now() }];
       setSegments(segmentsRef.current);
       partialRef.current = "";
       setPartial("");
@@ -133,8 +138,7 @@ export function LiveCallClient() {
       partialRef.current = "";
       setSegments([]);
       setPartial("");
-      setFoodByTier(emptyByTier());
-      setCommByTier(emptyByTier());
+      setBoxes(emptyBoxes());
       setRecording(true);
       timersRef.current = TIERS.map(({ tier, everyMs, windowSec }) =>
         setInterval(() => runCoach(tier, windowSec), everyMs),
@@ -150,10 +154,7 @@ export function LiveCallClient() {
   const stop = useCallback(async () => {
     teardown();
     setRecording(false);
-    const fullTranscript = [
-      ...segmentsRef.current.map((s) => s.text),
-      partialRef.current,
-    ]
+    const fullTranscript = [...segmentsRef.current.map((s) => s.text), partialRef.current]
       .join(" ")
       .trim();
     if (!fullTranscript) return;
@@ -165,8 +166,7 @@ export function LiveCallClient() {
         body: JSON.stringify({
           transcript: fullTranscript,
           startedAt: startedAtRef.current,
-          durationSec:
-            (Date.now() - new Date(startedAtRef.current).getTime()) / 1000,
+          durationSec: (Date.now() - new Date(startedAtRef.current).getTime()) / 1000,
         }),
       });
       const data = await res.json();
@@ -179,49 +179,69 @@ export function LiveCallClient() {
     }
   }, [teardown]);
 
-  const foodCards = dedup(Object.values(foodByTier).flat());
-  const commCards = dedup(Object.values(commByTier).flat());
-
   return (
     <div className="flex h-[calc(100vh-3.5rem)] flex-col p-6">
-      {/* Top-center toggle */}
-      <div className="mb-5 flex flex-col items-center gap-1">
-        <Button
-          onClick={recording ? stop : start}
-          disabled={connecting || summarizing}
-          variant={recording ? "destructive" : "default"}
-          size="lg"
-        >
-          {recording ? (
-            <><Square className="size-4" /> Stop opkald</>
-          ) : (
-            <><Mic className="size-4" /> Tænd for Food Scientist Agent</>
-          )}
-        </Button>
-        <p className="text-xs text-muted-foreground">
-          {connecting
-            ? "Forbinder…"
-            : recording
-              ? "● Optager — mikrofonen registreres som samtalen"
-              : summarizing
-                ? "Opsummerer opkaldet…"
-                : "Klik for at starte live-coaching"}
-        </p>
-        {error && <p className="text-xs text-destructive">{error}</p>}
+      {/* Controls */}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={recording ? stop : start}
+            disabled={connecting || summarizing}
+            variant={recording ? "destructive" : "default"}
+            size="lg"
+          >
+            {recording ? (
+              <><Square className="size-4" /> Stop opkald</>
+            ) : (
+              <><Mic className="size-4" /> Tænd for Food Scientist Agent</>
+            )}
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            {connecting
+              ? "Forbinder…"
+              : recording
+                ? "● Optager"
+                : summarizing
+                  ? "Opsummerer…"
+                  : "Klik for at starte"}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setShowDebug((v) => !v)}>
+            {showDebug ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            {showDebug ? "Skjul prompts" : "Vis prompts"}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setTranscriptOpen((v) => !v)}>
+            {transcriptOpen ? <ChevronDown className="size-4" /> : <ChevronUp className="size-4" />}
+            Transskription
+          </Button>
+        </div>
+      </div>
+      {error && <p className="mb-3 text-xs text-destructive">{error}</p>}
+
+      {/* 3 horizon boxes */}
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-3">
+        {TIERS.map(({ tier, label, sublabel }) => (
+          <HorizonBox
+            key={tier}
+            label={label}
+            sublabel={sublabel}
+            food={boxes[tier].food}
+            commercial={boxes[tier].commercial}
+            updatedAt={boxes[tier].updatedAt}
+            active={recording}
+            showDebug={showDebug}
+            debug={boxes[tier].debug}
+          />
+        ))}
       </div>
 
-      {/* 3-pane */}
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[1fr_1.3fr_1fr]">
-        <div className="min-h-0 rounded-2xl border border-border bg-card p-4">
-          <CoachPane title="Food scientist" accent="#3E8E5E" cards={foodCards} active={recording} />
-        </div>
-        <div className="min-h-0">
+      {/* Minimisable transcript */}
+      {transcriptOpen && (
+        <div className="mt-4 h-44 shrink-0">
           <Transcript segments={segments.map((s) => s.text)} partial={partial} />
         </div>
-        <div className="min-h-0 rounded-2xl border border-border bg-card p-4">
-          <CoachPane title="Commercial coach" accent="#C8362C" cards={commCards} active={recording} />
-        </div>
-      </div>
+      )}
 
       {/* End-of-call summary */}
       {summary && (
@@ -232,7 +252,7 @@ export function LiveCallClient() {
               Opkalds-opsummering: {summary.headline}
             </h2>
           </div>
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-3 text-sm">
+          <div className="grid grid-cols-1 gap-5 text-sm sm:grid-cols-3">
             <SummaryList title="Ros" items={summary.praise} marker="◆" />
             <SummaryList title="Forbedringer" items={summary.improvements} marker="▲" />
             <SummaryList title="Action points (kunde)" items={summary.action_points} marker="→" />

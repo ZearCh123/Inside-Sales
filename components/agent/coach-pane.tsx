@@ -1,60 +1,122 @@
 export type CoachCard = { title: string; body: string; kind: string };
-
-const KIND_STYLE: Record<string, { bg: string; fg: string; label: string }> = {
-  question: { bg: "#e6edf5", fg: "#3a5b86", label: "Spørgsmål" },
-  recommendation: { bg: "#e4f0e8", fg: "#3E8E5E", label: "Anbefaling" },
-  objection: { bg: "#fbe6e3", fg: "#C0392B", label: "Objection" },
-  signal: { bg: "#f6ead4", fg: "#8a5a14", label: "Signal" },
-  tip: { bg: "#eee9e7", fg: "#6B5D5A", label: "Tip" },
+export type CoachDebug = {
+  model: string;
+  system: string;
+  user: string;
+  response?: string;
 };
 
-export function CoachPane({
-  title,
-  accent,
-  cards,
-  active,
+const KIND_LABEL: Record<string, string> = {
+  question: "Spørgsmål",
+  recommendation: "Anbefaling",
+  objection: "Objection",
+  signal: "Signal",
+  tip: "Tip",
+};
+
+function Card({
+  card,
+  source,
 }: {
-  title: string;
-  accent: string;
-  cards: CoachCard[];
-  active: boolean;
+  card: CoachCard;
+  source: "food" | "commercial";
 }) {
+  const accent = source === "food" ? "#3E8E5E" : "#C8362C";
+  const sourceLabel = source === "food" ? "Food scientist" : "Coach";
   return (
-    <div className="flex h-full flex-col">
-      <div className="mb-3 flex items-center gap-2">
-        <span className="size-2.5 rounded-full" style={{ backgroundColor: accent }} />
-        <h2 className="font-display text-sm font-semibold text-foreground">{title}</h2>
+    <div
+      className="rounded-xl border border-[#E7D7D2] bg-white p-3 shadow-sm"
+      style={{ borderLeft: `3px solid ${accent}` }}
+    >
+      <div className="mb-1 flex items-center justify-between gap-2">
+        <p className="text-sm font-semibold text-[#1B1418]">{card.title}</p>
+        <span
+          className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold"
+          style={{ backgroundColor: `${accent}1a`, color: accent }}
+        >
+          {sourceLabel}
+        </span>
+      </div>
+      <p className="text-[13px] leading-snug text-[#3a302e]">{card.body}</p>
+      <p className="mt-1 text-[10px] uppercase tracking-wide text-[#9a9591]">
+        {KIND_LABEL[card.kind] ?? card.kind}
+      </p>
+    </div>
+  );
+}
+
+function ago(updatedAt: number | null): string {
+  if (!updatedAt) return "venter…";
+  const s = Math.round((Date.now() - updatedAt) / 1000);
+  if (s < 5) return "netop nu";
+  if (s < 60) return `${s}s siden`;
+  return `${Math.round(s / 60)} min siden`;
+}
+
+/** One time-horizon box (e.g. 10s / 30s / 1min+) holding the latest coach cards. */
+export function HorizonBox({
+  label,
+  sublabel,
+  food,
+  commercial,
+  updatedAt,
+  active,
+  showDebug,
+  debug,
+}: {
+  label: string;
+  sublabel: string;
+  food: CoachCard[];
+  commercial: CoachCard[];
+  updatedAt: number | null;
+  active: boolean;
+  showDebug: boolean;
+  debug: CoachDebug | null;
+}) {
+  const empty = food.length === 0 && commercial.length === 0;
+  return (
+    <div className="flex min-h-0 flex-col rounded-2xl border border-border bg-card p-4">
+      <div className="mb-3 flex items-baseline justify-between">
+        <div>
+          <h2 className="font-display text-sm font-semibold text-foreground">{label}</h2>
+          <p className="text-[11px] text-muted-foreground">{sublabel}</p>
+        </div>
+        <span className="text-[10px] text-muted-foreground">{ago(updatedAt)}</span>
       </div>
 
-      {cards.length === 0 ? (
-        <div className="flex flex-1 items-center justify-center rounded-2xl border border-dashed border-border text-center">
-          <p className="px-6 text-xs text-muted-foreground">
-            {active ? "Lytter… kort dukker op når der er noget at arbejde med." : "Ikke aktiv."}
+      {empty ? (
+        <div className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-border text-center">
+          <p className="px-4 text-xs text-muted-foreground">
+            {active ? "Lytter…" : "Ikke aktiv."}
           </p>
         </div>
       ) : (
-        <div className="space-y-2.5 overflow-y-auto">
-          {cards.map((c, i) => {
-            const s = KIND_STYLE[c.kind] ?? KIND_STYLE.tip;
-            return (
-              <div
-                key={`${c.title}-${i}`}
-                className="animate-in fade-in slide-in-from-bottom-2 rounded-xl border border-[#E7D7D2] bg-white p-3 shadow-sm duration-200"
-              >
-                <div className="mb-1 flex items-center justify-between gap-2">
-                  <p className="text-sm font-semibold text-[#1B1418]">{c.title}</p>
-                  <span
-                    className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold"
-                    style={{ backgroundColor: s.bg, color: s.fg }}
-                  >
-                    {s.label}
-                  </span>
-                </div>
-                <p className="text-[13px] text-[#3a302e]">{c.body}</p>
-              </div>
-            );
-          })}
+        <div className="flex-1 space-y-2.5 overflow-y-auto">
+          {food.map((c, i) => (
+            <Card key={`f-${c.title}-${i}`} card={c} source="food" />
+          ))}
+          {commercial.map((c, i) => (
+            <Card key={`c-${c.title}-${i}`} card={c} source="commercial" />
+          ))}
         </div>
+      )}
+
+      {showDebug && debug && (
+        <details className="mt-3 rounded-md border border-border bg-secondary/40 p-2 text-[11px]">
+          <summary className="cursor-pointer text-muted-foreground">
+            Sendt til AI ({debug.model})
+          </summary>
+          <p className="mt-1 font-semibold text-foreground">System:</p>
+          <pre className="whitespace-pre-wrap break-words text-[10px] text-[#3a302e]">{debug.system}</pre>
+          <p className="mt-1 font-semibold text-foreground">User:</p>
+          <pre className="whitespace-pre-wrap break-words text-[10px] text-[#3a302e]">{debug.user}</pre>
+          {debug.response && (
+            <>
+              <p className="mt-1 font-semibold text-foreground">Svar:</p>
+              <pre className="whitespace-pre-wrap break-words text-[10px] text-[#3a302e]">{debug.response}</pre>
+            </>
+          )}
+        </details>
       )}
     </div>
   );

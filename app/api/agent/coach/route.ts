@@ -44,17 +44,16 @@ export async function POST(request: NextRequest) {
   const cfg = TIER_CONFIG[tier];
   const anthropic = createAnthropic();
 
+  const systemPrompt = coachSystemPrompt(config.company_profile);
+  const userMsg = `Seneste samtale-uddrag (tier: ${tier}):\n\n${transcript}`;
+  const debug = { model: cfg.model, system: systemPrompt, user: userMsg };
+
   const params: Record<string, unknown> = {
     model: cfg.model,
     max_tokens: cfg.maxTokens,
-    system: coachSystemPrompt(config.company_profile),
+    system: systemPrompt,
     output_config: { format: { type: "json_schema", schema: COACH_SCHEMA } },
-    messages: [
-      {
-        role: "user",
-        content: `Seneste samtale-uddrag (tier: ${tier}):\n\n${transcript}`,
-      },
-    ],
+    messages: [{ role: "user", content: userMsg }],
   };
   if (cfg.effort) {
     (params.output_config as Record<string, unknown>).effort = cfg.effort;
@@ -66,14 +65,18 @@ export async function POST(request: NextRequest) {
       params as unknown as Parameters<typeof anthropic.messages.create>[0],
     )) as { content: { type: string; text?: string }[] };
     const text = msg.content.find((b) => b.type === "text")?.text;
-    if (!text) return NextResponse.json({ food_scientist: [], commercial: [] });
+    if (!text) return NextResponse.json({ food_scientist: [], commercial: [], debug });
     const result = JSON.parse(text) as CoachResult;
     return NextResponse.json({
       food_scientist: result.food_scientist ?? [],
       commercial: result.commercial ?? [],
+      debug: { ...debug, response: text },
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Coach-fejl";
-    return NextResponse.json({ error: message, food_scientist: [], commercial: [] }, { status: 200 });
+    return NextResponse.json(
+      { error: message, food_scientist: [], commercial: [], debug },
+      { status: 200 },
+    );
   }
 }
