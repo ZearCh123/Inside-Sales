@@ -1,40 +1,44 @@
 import type { CompanyProfile } from "@/lib/intel/types";
 
-export type Tier = "fast" | "medium" | "deep";
+/** The six coaching fields. */
+export const FIELD_KEYS = [
+  "technical_questions",
+  "technical_value",
+  "sales_questions",
+  "objection_handling",
+  "customer_obs",
+  "other",
+] as const;
+export type FieldKey = (typeof FIELD_KEYS)[number];
 
-/** Model + reasoning per horizon box (10s reactive → 1min+ considered). */
-export const TIER_CONFIG: Record<
-  Tier,
-  { model: string; effort?: "low" | "medium" | "high"; thinking?: boolean; maxTokens: number }
-> = {
-  // Haiku does NOT accept the effort parameter — omit it.
-  fast: { model: "claude-haiku-4-5", maxTokens: 900 },
-  medium: { model: "claude-sonnet-4-6", effort: "low", maxTokens: 1200 },
-  deep: { model: "claude-sonnet-4-6", effort: "high", thinking: true, maxTokens: 1800 },
+export const FIELD_LABELS: Record<FieldKey, string> = {
+  technical_questions: "Technical questions",
+  technical_value: "Technical value / explanation",
+  sales_questions: "Sales questions",
+  objection_handling: "Objection handling",
+  customer_obs: "OBS about customer",
+  other: "Other",
 };
 
-const CARD_SCHEMA = {
-  type: "object",
-  additionalProperties: false,
-  properties: {
-    title: { type: "string" },
-    body: { type: "string" },
-    kind: {
-      type: "string",
-      enum: ["question", "recommendation", "objection", "signal", "tip"],
-    },
-  },
-  required: ["title", "body", "kind"],
-} as const;
+/** Single model for the 15s coaching pass. */
+export const COACH_MODEL = {
+  model: "claude-sonnet-4-6",
+  effort: "low" as const,
+  maxTokens: 1500,
+};
 
 export const COACH_SCHEMA = {
   type: "object",
   additionalProperties: false,
   properties: {
-    food_scientist: { type: "array", items: CARD_SCHEMA },
-    commercial: { type: "array", items: CARD_SCHEMA },
+    technical_questions: { type: "array", items: { type: "string" } },
+    technical_value: { type: "array", items: { type: "string" } },
+    sales_questions: { type: "array", items: { type: "string" } },
+    objection_handling: { type: "array", items: { type: "string" } },
+    customer_obs: { type: "array", items: { type: "string" } },
+    other: { type: "array", items: { type: "string" } },
   },
-  required: ["food_scientist", "commercial"],
+  required: [...FIELD_KEYS],
 } as const;
 
 export const SUMMARY_SCHEMA = {
@@ -49,63 +53,27 @@ export const SUMMARY_SCHEMA = {
   required: ["improvements", "praise", "action_points", "headline"],
 } as const;
 
-// Each horizon box has a DISTINCT role so the three boxes complement rather
-// than duplicate each other (the seller talks about one topic for >30s).
-const TIER_ROLE: Record<Tier, { focus: string; fs: string; cc: string }> = {
-  fast: {
-    focus: "LIGE NU (de sidste ~10 sekunder) — kun det mest akutte og taktiske.",
-    fs: "Det ÉNE tekniske svar/fakta sælgeren har brug for lige nu (fx et stabilitets-/dosis-tal der modsvarer en tvivl kunden netop udtrykte).",
-    cc: "Reagér på det der lige skete: håndtér en igangværende objection med en konkret sætning, eller bekræft et købssignal kunden lige gav.",
-  },
-  medium: {
-    focus: "KONTEKST (de sidste ~30 sekunder) — det aktuelle emne/tråd.",
-    fs: "Det bedste UDDYBENDE tekniske spørgsmål for at forstå behovet (pH-range, matrix, proces, dosering, holdbarhed) — IKKE et svar, men et spørgsmål der graver dybere.",
-    cc: "Det bedste discovery-spørgsmål (SPIN/BANT-need) der afdækker behov, beslutningsproces eller smertepunkt på det aktuelle emne.",
-  },
-  deep: {
-    focus: "STRATEGI (det sidste minut+) — det overordnede billede, ikke enkelt-replikker.",
-    fs: "Produkt-fit & anbefaling: hvilket af produkterne passer bedst og hvilke value points sælgeren bør lande — strategisk, ikke et enkelt spørgsmål.",
-    cc: "Hvor er dealen (MEDDIC/BANT: budget, beslutningstager, behov, timeline, hvad mangler) og hvad sælgeren bør styre samtalen mod / sætte som næste skridt.",
-  },
-};
-
-/** System prompt for one horizon box, role-specialised + de-duplicated. */
-export function coachSystemPrompt(
-  p: CompanyProfile,
-  tier: Tier,
-  shown: string[],
-): string {
+/** System prompt for the 15s coaching pass — sorts insights into six fields. */
+export function coachSystemPrompt(p: CompanyProfile, shown: string[]): string {
   const products = p.product_names.join(", ");
-  const role = TIER_ROLE[tier];
   const avoid = shown.length
-    ? `\n\nDISSE KORT VISES ALLEREDE — gentag dem IKKE (heller ikke i let omskrevet form):\n- ${shown.join("\n- ")}\nReturnér kun kort med GENUINT NYT indhold. Hvis der intet nyt er ud over ovenstående, returnér TOMME lister.`
+    ? `\n\nDISSE PUNKTER ER ALLEREDE PÅ SKÆRMEN — gentag dem IKKE (heller ikke omskrevet):\n- ${shown.slice(0, 30).join("\n- ")}\nReturnér kun GENUINT NYE punkter. Intet nyt → tomme arrays.`
     : "";
 
-  return `Du coacher en sælger fra ${p.company_name} LIVE under et kundeopkald. Du modtager et uddrag af samtalen (sælger + kunde blandet — udled selv hvem der taler).
+  return `Du coacher en sælger fra ${p.company_name} LIVE under et kundeopkald. Du får de sidste ~30 sekunder af samtalen (sælger + kunde blandet — udled selv hvem der taler). Value proposition: ${p.value_proposition}. Produkter: ${products}. Differentiatorer: ${p.differentiators.join(", ")}.
 
-DENNE BOKS' FOKUS: ${role.focus}
+Tjek for både sales- og technical-coaching og fordel indsigter i SEKS felter (tom array hvis intet relevant i feltet):
+- technical_questions: tekniske spørgsmål sælgeren bør stille kunden (pH, varmebehandling, matrix, dosering, applikation, holdbarhed).
+- technical_value: teknisk værdi/forklaring sælgeren bør give om ${products} (fx varme-/pH-stabilitet, vegansk, non-GMO — opfind plausible value points indtil en rigtig vidensbase er koblet på).
+- sales_questions: salgsspørgsmål (BANT/SPIN: behov, budget, beslutningstager, timeline, smerte).
+- objection_handling: håndtering af objections — konkret HVAD sælgeren skal sige.
+- customer_obs: OBS om kunden (profilering — rolle, modenhed, incumbent-løsning, smertepunkter, signaler).
+- other: alt andet relevant der ikke passer ovenfor.
 
-FOOD SCIENTIST (food_scientist[]): Du er PhD food scientist-specialist i ${p.company_name}'s farver (${products}). Value proposition: ${p.value_proposition}. Differentiatorer: ${p.differentiators.join(", ")}.
-- ${role.fs}
-- Opfind realistiske tekniske fordele (pH-/varme-stabilitet, vegansk, non-GMO) indtil en rigtig vidensbase er koblet på.
-
-COMMERCIAL COACH (commercial[]): Du er top sales coach (BANT, Miller Heiman, MEDDIC, SPIN).
-- ${role.cc}
-- Ved objection: giv en konkret sætning sælgeren kan sige.
-
-FORMAT (KRITISK — sælgeren er presset og skal kunne skimme på et splitsekund):
-- title = 2-4 ords etiket (fx "pH & varme", "Pris-objection", "Beslutningstager").
-- body = ULTRAKORT KOMMANDO i stikord, bydeform, ≤10 ord. Ingen hele sætninger. Mønstre:
-  · Spørgsmål → "Spørg: pH-range + varmebehandling?"
-  · Objection → "Objection: pris. Sig: sparer allergi-reklamationer."
-  · Signal → "Signal: sagde 'vegansk'. Grav i hvorfor."
-  · Anbefaling → "Pitch: Natu.Red — varmestabil til 80°C."
-- Brug "→" og kolon, ikke fyldord. Aldrig "Du kunne overveje at…". Bare kommandoen.
-
-REGLER:
-- Bliv inden for DENNE BOKS' fokus — overlad det taktiske til "lige nu"-boksen og det strategiske til "strategi"-boksen.
-- HØJST 2 kort pr. side. kind ∈ question|recommendation|objection|signal|tip.
-- Returnér KUN høj-værdi kort; ellers TOMME lister.${avoid}`;
+FORMAT (KRITISK — sælgeren skal skimme på et splitsekund):
+- Hvert element = ULTRAKORT kommando i stikord, bydeform, ≤10 ord. Ingen hele sætninger.
+- Eksempler: "Spørg: pH-range + pasteurisering?" · "Sig: Natu.Red stabil til 80°C" · "Objection: pris → sparer allergi-claims" · "OBS: R&D-chef er medbeslutter" · "Spørg: budget afsat til Q3?"
+- HØJST 2-3 punkter pr. felt. Vælg det vigtigste. Kun høj-værdi — ellers tom.${avoid}`;
 }
 
 /** System prompt for the end-of-call summary. */
