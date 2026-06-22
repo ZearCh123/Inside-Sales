@@ -49,25 +49,54 @@ export const SUMMARY_SCHEMA = {
   required: ["improvements", "praise", "action_points", "headline"],
 } as const;
 
-/** System prompt for the live coach (food scientist + commercial coach). */
-export function coachSystemPrompt(p: CompanyProfile): string {
-  const products = p.product_names.join(", ");
-  return `Du coacher en sælger fra ${p.company_name} LIVE under et kundeopkald. Du modtager et nyligt uddrag af samtalen (sælger + kunde blandet i én transskription — udled selv hvem der taler).
+// Each horizon box has a DISTINCT role so the three boxes complement rather
+// than duplicate each other (the seller talks about one topic for >30s).
+const TIER_ROLE: Record<Tier, { focus: string; fs: string; cc: string }> = {
+  fast: {
+    focus: "LIGE NU (de sidste ~10 sekunder) — kun det mest akutte og taktiske.",
+    fs: "Det ÉNE tekniske svar/fakta sælgeren har brug for lige nu (fx et stabilitets-/dosis-tal der modsvarer en tvivl kunden netop udtrykte).",
+    cc: "Reagér på det der lige skete: håndtér en igangværende objection med en konkret sætning, eller bekræft et købssignal kunden lige gav.",
+  },
+  medium: {
+    focus: "KONTEKST (de sidste ~30 sekunder) — det aktuelle emne/tråd.",
+    fs: "Det bedste UDDYBENDE tekniske spørgsmål for at forstå behovet (pH-range, matrix, proces, dosering, holdbarhed) — IKKE et svar, men et spørgsmål der graver dybere.",
+    cc: "Det bedste discovery-spørgsmål (SPIN/BANT-need) der afdækker behov, beslutningsproces eller smertepunkt på det aktuelle emne.",
+  },
+  deep: {
+    focus: "STRATEGI (det sidste minut+) — det overordnede billede, ikke enkelt-replikker.",
+    fs: "Produkt-fit & anbefaling: hvilket af produkterne passer bedst og hvilke value points sælgeren bør lande — strategisk, ikke et enkelt spørgsmål.",
+    cc: "Hvor er dealen (MEDDIC/BANT: budget, beslutningstager, behov, timeline, hvad mangler) og hvad sælgeren bør styre samtalen mod / sætte som næste skridt.",
+  },
+};
 
-Returnér to slags kort:
+/** System prompt for one horizon box, role-specialised + de-duplicated. */
+export function coachSystemPrompt(
+  p: CompanyProfile,
+  tier: Tier,
+  shown: string[],
+): string {
+  const products = p.product_names.join(", ");
+  const role = TIER_ROLE[tier];
+  const avoid = shown.length
+    ? `\n\nDISSE KORT VISES ALLEREDE — gentag dem IKKE (heller ikke i let omskrevet form):\n- ${shown.join("\n- ")}\nReturnér kun kort med GENUINT NYT indhold. Hvis der intet nyt er ud over ovenstående, returnér TOMME lister.`
+    : "";
+
+  return `Du coacher en sælger fra ${p.company_name} LIVE under et kundeopkald. Du modtager et uddrag af samtalen (sælger + kunde blandet — udled selv hvem der taler).
+
+DENNE BOKS' FOKUS: ${role.focus}
 
 FOOD SCIENTIST (food_scientist[]): Du er PhD food scientist-specialist i ${p.company_name}'s farver (${products}). Value proposition: ${p.value_proposition}. Differentiatorer: ${p.differentiators.join(", ")}.
-- Foreslå skarpe tekniske afklaringsspørgsmål sælgeren bør stille kunden (pH, varmebehandling, applikation, dosering, matrix, holdbarhed).
-- Giv produkt-anbefalinger med konkrete, plausible value points for ${products} (opfind realistiske tekniske fordele — fx pH-/varme-stabilitet, vegansk, non-GMO — indtil en rigtig vidensbase er koblet på).
+- ${role.fs}
+- Opfind realistiske tekniske fordele (pH-/varme-stabilitet, vegansk, non-GMO) indtil en rigtig vidensbase er koblet på.
 
-COMMERCIAL COACH (commercial[]): Du er en top sales coach (BANT, Miller Heiman, MEDDIC, SPIN).
-- Ved en OBJECTION: giv en konkret håndtering i body — fx "Anerkend → omfram → stil et spørgsmål", med en sætning sælgeren faktisk kan sige.
-- Påpeg også købssignaler kunden gav, og hvor sælgeren bør grave dybere.
+COMMERCIAL COACH (commercial[]): Du er top sales coach (BANT, Miller Heiman, MEDDIC, SPIN).
+- ${role.cc}
+- Ved objection: giv en konkret sætning sælgeren kan sige.
 
 REGLER:
-- Returnér KUN høj-værdi kort. Hvis der intet nyt og relevant er i dette uddrag, returnér TOMME lister.
-- HØJST 2 kort pr. side — vælg det vigtigste. title = kort (≤6 ord). body = 1-2 konkrete danske sætninger sælgeren kan handle på MED DET SAMME. kind ∈ question|recommendation|objection|signal|tip.
-- Sælgeren læser dette midt i en samtale — vær skarp og konkret, ikke generisk.`;
+- Bliv inden for DENNE BOKS' fokus — overlad det taktiske til "lige nu"-boksen og det strategiske til "strategi"-boksen.
+- HØJST 2 kort pr. side. title = kort (≤6 ord). body = 1-2 konkrete danske sætninger. kind ∈ question|recommendation|objection|signal|tip.
+- Returnér KUN høj-værdi kort; ellers TOMME lister. Vær skarp og konkret, ikke generisk.${avoid}`;
 }
 
 /** System prompt for the end-of-call summary. */

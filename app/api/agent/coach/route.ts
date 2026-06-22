@@ -33,9 +33,11 @@ export async function POST(request: NextRequest) {
   const body = (await request.json().catch(() => ({}))) as {
     tier?: Tier;
     transcript?: string;
+    shown?: string[];
   };
   const tier: Tier = body.tier ?? "fast";
   const transcript = (body.transcript ?? "").trim();
+  const shown = Array.isArray(body.shown) ? body.shown.slice(0, 12) : [];
   if (!transcript) {
     return NextResponse.json({ food_scientist: [], commercial: [] });
   }
@@ -44,7 +46,7 @@ export async function POST(request: NextRequest) {
   const cfg = TIER_CONFIG[tier];
   const anthropic = createAnthropic();
 
-  const systemPrompt = coachSystemPrompt(config.company_profile);
+  const systemPrompt = coachSystemPrompt(config.company_profile, tier, shown);
   const userMsg = `Seneste samtale-uddrag (tier: ${tier}):\n\n${transcript}`;
   const debug = { model: cfg.model, system: systemPrompt, user: userMsg };
 

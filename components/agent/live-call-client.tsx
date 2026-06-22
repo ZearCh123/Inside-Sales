@@ -50,6 +50,7 @@ export function LiveCallClient() {
   const [showDebug, setShowDebug] = useState(false);
 
   const connRef = useRef<RealtimeConnection | null>(null);
+  const boxesRef = useRef<Record<Tier, BoxState>>(emptyBoxes());
   const micRef = useRef<MediaStream | null>(null);
   const timersRef = useRef<ReturnType<typeof setInterval>[]>([]);
   const segmentsRef = useRef<Segment[]>([]);
@@ -77,11 +78,15 @@ export function LiveCallClient() {
       " " +
       partialRef.current;
     if (!windowText.trim()) return;
+    // Titles already on screen (across all boxes) so the model won't repeat them.
+    const shown = Object.values(boxesRef.current)
+      .flatMap((b) => [...b.food, ...b.commercial])
+      .map((c) => c.title);
     try {
       const res = await fetch("/api/agent/coach", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tier, transcript: windowText.trim() }),
+        body: JSON.stringify({ tier, transcript: windowText.trim(), shown }),
       });
       const data = (await res.json()) as {
         food_scientist?: CoachCard[];
@@ -90,15 +95,12 @@ export function LiveCallClient() {
       };
       const food = data.food_scientist ?? [];
       const commercial = data.commercial ?? [];
-      setBoxes((prev) => {
-        const hasNew = food.length > 0 || commercial.length > 0;
-        return {
-          ...prev,
-          [tier]: hasNew
-            ? { food, commercial, updatedAt: Date.now(), debug: data.debug ?? null }
-            : { ...prev[tier], debug: data.debug ?? prev[tier].debug },
-        };
-      });
+      const hasNew = food.length > 0 || commercial.length > 0;
+      const next: BoxState = hasNew
+        ? { food, commercial, updatedAt: Date.now(), debug: data.debug ?? null }
+        : { ...boxesRef.current[tier], debug: data.debug ?? boxesRef.current[tier].debug };
+      boxesRef.current = { ...boxesRef.current, [tier]: next };
+      setBoxes(boxesRef.current);
     } catch {
       /* a missed coach tick is harmless */
     }
@@ -138,6 +140,7 @@ export function LiveCallClient() {
       partialRef.current = "";
       setSegments([]);
       setPartial("");
+      boxesRef.current = emptyBoxes();
       setBoxes(emptyBoxes());
       setRecording(true);
       timersRef.current = TIERS.map(({ tier, everyMs, windowSec }) =>
