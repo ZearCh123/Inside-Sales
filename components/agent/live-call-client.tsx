@@ -1,11 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Mic, Square, Sparkles, Eye, EyeOff, ChevronDown, ChevronUp } from "lucide-react";
+import { Mic, Square, Sparkles, Eye, EyeOff, ListChecks, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { connectRealtime, type RealtimeConnection } from "@/lib/agent/realtime";
 import { HorizonBox, type CoachCard, type CoachDebug } from "./coach-pane";
 import { Transcript } from "./transcript";
+import { Checklist, type ChecklistItem } from "./checklist";
+
+const normId = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim().slice(0, 60);
 
 type Tier = "fast" | "medium" | "deep";
 const TIERS: {
@@ -46,11 +49,14 @@ export function LiveCallClient() {
   const [boxes, setBoxes] = useState(emptyBoxes());
   const [summary, setSummary] = useState<Summary | null>(null);
   const [summarizing, setSummarizing] = useState(false);
-  const [transcriptOpen, setTranscriptOpen] = useState(true);
+  const [checklist, setChecklist] = useState<ChecklistItem[]>([]);
+  const [checklistOpen, setChecklistOpen] = useState(true);
+  const [transcriptOpen, setTranscriptOpen] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
 
   const connRef = useRef<RealtimeConnection | null>(null);
   const boxesRef = useRef<Record<Tier, BoxState>>(emptyBoxes());
+  const checklistRef = useRef<ChecklistItem[]>([]);
   const micRef = useRef<MediaStream | null>(null);
   const timersRef = useRef<ReturnType<typeof setInterval>[]>([]);
   const segmentsRef = useRef<Segment[]>([]);
@@ -101,6 +107,20 @@ export function LiveCallClient() {
         : { ...boxesRef.current[tier], debug: data.debug ?? boxesRef.current[tier].debug };
       boxesRef.current = { ...boxesRef.current, [tier]: next };
       setBoxes(boxesRef.current);
+
+      // Accumulate actionable cards into the checklist (dedup by command text).
+      const incoming: ChecklistItem[] = [
+        ...food.map((c) => ({ id: normId(c.body), text: c.body, kind: c.kind, source: "food" as const, done: false })),
+        ...commercial.map((c) => ({ id: normId(c.body), text: c.body, kind: c.kind, source: "commercial" as const, done: false })),
+      ];
+      let changed = false;
+      for (const it of incoming) {
+        if (it.text && !checklistRef.current.some((x) => x.id === it.id)) {
+          checklistRef.current = [...checklistRef.current, it];
+          changed = true;
+        }
+      }
+      if (changed) setChecklist(checklistRef.current);
     } catch {
       /* a missed coach tick is harmless */
     }
@@ -142,6 +162,8 @@ export function LiveCallClient() {
       setPartial("");
       boxesRef.current = emptyBoxes();
       setBoxes(emptyBoxes());
+      checklistRef.current = [];
+      setChecklist([]);
       setRecording(true);
       timersRef.current = TIERS.map(({ tier, everyMs, windowSec }) =>
         setInterval(() => runCoach(tier, windowSec), everyMs),
@@ -182,6 +204,13 @@ export function LiveCallClient() {
     }
   }, [teardown]);
 
+  const toggleChecklistItem = useCallback((id: string) => {
+    checklistRef.current = checklistRef.current.map((i) =>
+      i.id === id ? { ...i, done: !i.done } : i,
+    );
+    setChecklist(checklistRef.current);
+  }, []);
+
   return (
     <div className="flex h-[calc(100vh-3.5rem)] flex-col p-6">
       {/* Controls */}
@@ -210,13 +239,23 @@ export function LiveCallClient() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            variant={checklistOpen ? "secondary" : "outline"}
+            size="sm"
+            onClick={() => setChecklistOpen((v) => !v)}
+          >
+            <ListChecks className="size-4" /> Tjekliste
+          </Button>
+          <Button
+            variant={transcriptOpen ? "secondary" : "outline"}
+            size="sm"
+            onClick={() => setTranscriptOpen((v) => !v)}
+          >
+            <FileText className="size-4" /> Transskription
+          </Button>
           <Button variant="outline" size="sm" onClick={() => setShowDebug((v) => !v)}>
             {showDebug ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
             {showDebug ? "Skjul prompts" : "Vis prompts"}
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setTranscriptOpen((v) => !v)}>
-            {transcriptOpen ? <ChevronDown className="size-4" /> : <ChevronUp className="size-4" />}
-            Transskription
           </Button>
         </div>
       </div>
@@ -239,10 +278,19 @@ export function LiveCallClient() {
         ))}
       </div>
 
-      {/* Minimisable transcript */}
-      {transcriptOpen && (
-        <div className="mt-4 h-44 shrink-0">
-          <Transcript segments={segments.map((s) => s.text)} partial={partial} />
+      {/* Checklist + minimisable transcript */}
+      {(checklistOpen || transcriptOpen) && (
+        <div className="mt-4 flex h-48 shrink-0 gap-4">
+          {checklistOpen && (
+            <div className="min-h-0 flex-1">
+              <Checklist items={checklist} onToggle={toggleChecklistItem} />
+            </div>
+          )}
+          {transcriptOpen && (
+            <div className="min-h-0 flex-1">
+              <Transcript segments={segments.map((s) => s.text)} partial={partial} />
+            </div>
+          )}
         </div>
       )}
 

@@ -93,10 +93,19 @@ COMMERCIAL COACH (commercial[]): Du er top sales coach (BANT, Miller Heiman, MED
 - ${role.cc}
 - Ved objection: giv en konkret sætning sælgeren kan sige.
 
+FORMAT (KRITISK — sælgeren er presset og skal kunne skimme på et splitsekund):
+- title = 2-4 ords etiket (fx "pH & varme", "Pris-objection", "Beslutningstager").
+- body = ULTRAKORT KOMMANDO i stikord, bydeform, ≤10 ord. Ingen hele sætninger. Mønstre:
+  · Spørgsmål → "Spørg: pH-range + varmebehandling?"
+  · Objection → "Objection: pris. Sig: sparer allergi-reklamationer."
+  · Signal → "Signal: sagde 'vegansk'. Grav i hvorfor."
+  · Anbefaling → "Pitch: Natu.Red — varmestabil til 80°C."
+- Brug "→" og kolon, ikke fyldord. Aldrig "Du kunne overveje at…". Bare kommandoen.
+
 REGLER:
 - Bliv inden for DENNE BOKS' fokus — overlad det taktiske til "lige nu"-boksen og det strategiske til "strategi"-boksen.
-- HØJST 2 kort pr. side. title = kort (≤6 ord). body = 1-2 konkrete danske sætninger. kind ∈ question|recommendation|objection|signal|tip.
-- Returnér KUN høj-værdi kort; ellers TOMME lister. Vær skarp og konkret, ikke generisk.${avoid}`;
+- HØJST 2 kort pr. side. kind ∈ question|recommendation|objection|signal|tip.
+- Returnér KUN høj-værdi kort; ellers TOMME lister.${avoid}`;
 }
 
 /** System prompt for the end-of-call summary. */

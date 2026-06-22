@@ -22,24 +22,25 @@ function Card({
   source: "food" | "commercial";
 }) {
   const accent = source === "food" ? "#3E8E5E" : "#C8362C";
-  const sourceLabel = source === "food" ? "Food scientist" : "Coach";
+  const sourceLabel = source === "food" ? "Tech" : "Sales";
   return (
     <div
-      className="rounded-xl border border-[#E7D7D2] bg-white p-3 shadow-sm"
+      className="rounded-lg border border-[#E7D7D2] bg-white p-2.5 shadow-sm"
       style={{ borderLeft: `3px solid ${accent}` }}
     >
-      <div className="mb-1 flex items-center justify-between gap-2">
-        <p className="text-sm font-semibold text-[#1B1418]">{card.title}</p>
+      <div className="mb-1 flex items-center gap-1.5">
         <span
-          className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold"
+          className="rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide"
           style={{ backgroundColor: `${accent}1a`, color: accent }}
         >
           {sourceLabel}
         </span>
+        <span className="text-[9px] font-semibold uppercase tracking-wide text-[#9a9591]">
+          {KIND_LABEL[card.kind] ?? card.kind}
+        </span>
       </div>
-      <p className="text-[13px] leading-snug text-[#3a302e]">{card.body}</p>
-      <p className="mt-1 text-[10px] uppercase tracking-wide text-[#9a9591]">
-        {KIND_LABEL[card.kind] ?? card.kind}
+      <p className="text-[13px] font-semibold leading-snug text-[#1B1418]">
+        {card.body}
       </p>
     </div>
   );
