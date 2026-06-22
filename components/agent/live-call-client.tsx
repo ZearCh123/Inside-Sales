@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Mic, Square, Sparkles, Eye, EyeOff, ListChecks, FileText } from "lucide-react";
+import { Mic, Square, Sparkles, Eye, EyeOff, ListChecks, FileText, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { connectRealtime, type RealtimeConnection } from "@/lib/agent/realtime";
 import { HorizonBox, type CoachCard, type CoachDebug } from "./coach-pane";
@@ -49,6 +49,7 @@ export function LiveCallClient() {
   const [boxes, setBoxes] = useState(emptyBoxes());
   const [summary, setSummary] = useState<Summary | null>(null);
   const [summarizing, setSummarizing] = useState(false);
+  const [summaryOpen, setSummaryOpen] = useState(true);
   const [checklist, setChecklist] = useState<ChecklistItem[]>([]);
   const [checklistOpen, setChecklistOpen] = useState(true);
   const [transcriptOpen, setTranscriptOpen] = useState(false);
@@ -195,8 +196,10 @@ export function LiveCallClient() {
         }),
       });
       const data = await res.json();
-      if (res.ok) setSummary(data as Summary);
-      else setError(data.error ?? "Opsummering fejlede");
+      if (res.ok) {
+        setSummary(data as Summary);
+        setSummaryOpen(true);
+      } else setError(data.error ?? "Opsummering fejlede");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Opsummering fejlede");
     } finally {
@@ -294,20 +297,30 @@ export function LiveCallClient() {
         </div>
       )}
 
-      {/* End-of-call summary */}
+      {/* End-of-call summary (minimisable) */}
       {summary && (
-        <div className="mt-4 rounded-2xl border border-border bg-card p-5">
-          <div className="mb-3 flex items-center gap-2">
-            <Sparkles className="size-4 text-brand-crimson" />
-            <h2 className="font-display text-base font-semibold text-foreground">
+        <div className="mt-4 rounded-2xl border border-border bg-card">
+          <button
+            onClick={() => setSummaryOpen((v) => !v)}
+            className="flex w-full items-center gap-2 px-5 py-3 text-left"
+          >
+            <Sparkles className="size-4 shrink-0 text-brand-crimson" />
+            <h2 className="flex-1 font-display text-base font-semibold text-foreground">
               Opkalds-opsummering: {summary.headline}
             </h2>
-          </div>
-          <div className="grid grid-cols-1 gap-5 text-sm sm:grid-cols-3">
-            <SummaryList title="Ros" items={summary.praise} marker="◆" />
-            <SummaryList title="Forbedringer" items={summary.improvements} marker="▲" />
-            <SummaryList title="Action points (kunde)" items={summary.action_points} marker="→" />
-          </div>
+            {summaryOpen ? (
+              <ChevronDown className="size-4 text-muted-foreground" />
+            ) : (
+              <ChevronUp className="size-4 text-muted-foreground" />
+            )}
+          </button>
+          {summaryOpen && (
+            <div className="grid grid-cols-1 gap-5 px-5 pb-5 text-sm sm:grid-cols-3">
+              <SummaryList title="Ros" items={summary.praise} marker="◆" />
+              <SummaryList title="Forbedringer" items={summary.improvements} marker="▲" />
+              <SummaryList title="Action points (kunde)" items={summary.action_points} marker="→" />
+            </div>
+          )}
         </div>
       )}
     </div>
